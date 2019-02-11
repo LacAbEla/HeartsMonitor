@@ -10,7 +10,7 @@ Utilizar tipos de datos pequeños (byte, short) no sirve para ahorrar espacio si
 https://stackoverflow.com/questions/27122610/why-does-the-java-api-use-int-instead-of-short-or-byte#27123302
 
 TODO: usar loggers en lugar de prints
-TODO: usar loggers para indicar cuando se abre o cierra una conexion de HiloReceptor
+TODO: usar loggers para indicar cuando se abre o cierra una conexion de ReceptorTCP
  */
 package HeartsMonitor;
 
@@ -18,15 +18,17 @@ package HeartsMonitor;
  *
  * @author Alejandro Balaguer Calderón
  */
-public class PrototipoPFC {
+public class Monitor {
     
     private static Controlador controlador;
     
     public static void main(String[] args) throws InterruptedException {
-        controlador = new Controlador(12345);
-        new Thread(controlador).start();
+        controlador = new Controlador();
+        //new Thread(controlador).start();
         
         //Pruebas
+        controlador.anadirConexionUDP(12345, "testUDP");
+        controlador.anadirConexionTCP(12345, "testTCP");
         for(int i=0; i<22222; i++){
             imprimirDatos();
             Thread.sleep(500);
@@ -37,8 +39,8 @@ public class PrototipoPFC {
     
     //Método temporal para poder ver los datos sin interfaz visual.
     private static void imprimirDatos(){
-        HiloReceptor[] conexiones = controlador.getConexiones();
-        for(HiloReceptor conexion : conexiones){
+        Receptor[] conexiones = controlador.getConexiones();
+        for(Receptor conexion : conexiones){
             System.out.println(conexion.getNombre() + ": " + conexion.getLatidos() + ".");
         }
     }

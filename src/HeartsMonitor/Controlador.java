@@ -1,13 +1,10 @@
 /*
  * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+
+Para cerrar el controlador debe usarse thread.interrupt. Esto pide al hilo que se cierre, pero no lo fuerza.
  */
 package HeartsMonitor;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
@@ -15,75 +12,63 @@ import java.util.ArrayList;
  *
  * @author Alejandro Balaguer Calderón
  */
-public class Controlador implements Runnable {
+public class Controlador {
 
-    private final int puerto;
-    private ServerSocket servidor;
-    private ArrayList<HiloReceptor> receptores;
-    private Thread hiloControlador; //Es el hilo que ejecuta el run() de este controlador
+    private ArrayList<Receptor> receptores;
 
-    public Controlador(int puerto) {
-        this.puerto = puerto;
-        receptores = new ArrayList<HiloReceptor>();
+    public Controlador() {
+        receptores = new ArrayList<Receptor>();
     }
     
     
-    //Para cerrar el controlador debe usarse thread.interrupt.
-    @Override
-    public void run() {
-        try{
-            
-            hiloControlador = Thread.currentThread();
-            servidor = new ServerSocket(puerto);
-            
-            //Bucle para aceptar peticiones
-            while(true){
-                Socket conexion = servidor.accept();
-                HiloReceptor receptor = new HiloReceptor(conexion, "test");
-                receptores.add(receptor);
-                Thread hilo = new Thread(receptor);
-                hilo.start();
-                System.out.println("dep");
-            }
-            
-        }catch(SocketException e){
-            System.out.println("Error de socket/Servidor cerrado");
-            e.printStackTrace();
-        }catch(IOException e){
-            System.out.println("\n\nError en el controlador.\n");
+    public Receptor[] getConexiones(){
+        return receptores.toArray(new Receptor[0]);
+    }
+    
+    public void anadirConexionTCP(int puerto, String nombre){
+        ReceptorTCP receptor = new ReceptorTCP(puerto, nombre);
+        receptores.add(receptor);
+        Thread hilo = new Thread(receptor);
+        hilo.start();
+        System.out.println("Hilo TCP iniciado.");
+    }
+    
+    public void anadirConexionUDP(int puerto, String nombre){
+        ReceptorUDP receptor;
+        try {
+            receptor = new ReceptorUDP(puerto, nombre);
+            receptores.add(receptor);
+            Thread hilo = new Thread(receptor);
+            hilo.start();
+            System.out.println("Hilo UDP iniciado.");
+        } catch (SocketException e) {
+            System.out.println("\n\nError al añadir una conexin UDP.\n");
             e.printStackTrace();
         }
-    }
-    
-    public HiloReceptor[] getConexiones(){
-        return receptores.toArray(new HiloReceptor[0]);
     }
     
     //Detiene el controlador y cierra todos los hilos receptores.
     public void detener(){
         System.out.println("Deteniendo controlador...");
         
-        //Cierra la conexión, provocando el cierre del hilo del controlador a lo bruto. TODO: Mejorar sistema de cierre.
-        try{
-            servidor.close();
-        }catch(IOException e){
-            System.out.println("Error al cerrar la conexión del servidor.");
-            e.printStackTrace();
-        }
+        //Detiene todos los hilos receptores
+        for(Receptor hilo : receptores)
+            hilo.detener();
         
-        //Hacer que el hilo principal (el que está ejecutando detener()) espere a que el hilo del controlador se detenga.
-        //Si no se detiene en 30 segundos continua igualmente. Si se da el caso seguramente el hilo controlador se haya atascado en algo y se puedan cerrar las conexiones sin riesgo.
-        //Nota: esto no hara nada teniendo en cuenta el sistema de mierda que uso ahora mismo para cerrar el hilo
-        try{
-            hiloControlador.join(30000);
-        }catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         
-        //Cerrar todos los hilos receptores
-        for(HiloReceptor receptor : receptores){
-            receptor.detener();
-        }
+            //Hacer que el hilo principal (el que está ejecutando detener()) espere a que el hilo del controlador se detenga.
+            //Si no se detiene en 30 segundos continua igualmente. Si se da el caso seguramente el hilo controlador se haya atascado en algo y se puedan cerrar las conexiones sin riesgo.
+            //Nota: esto no hara nada teniendo en cuenta el sistema de mierda que uso ahora mismo para cerrar el hilo
+            //try{
+            //    hiloControlador.join(30000);
+            //}catch (InterruptedException e) {
+            //    e.printStackTrace();
+            //}
+            
+        //se podria esperar 5 segundos o algo asi para que se cierre todo seguro
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {}
         
         System.out.println("Controlador detenido.");
     }
