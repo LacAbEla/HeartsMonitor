@@ -1,5 +1,6 @@
 /*
  * Hilo encargado de mantener la comunicacin TCP con un dispositivo de entrada
+ * Si cae la conexión tratará de volver a conectarse.
  * Esta clase distingue entre nombre (nombre interno, a modo de ID) y nombre a mostrar (que sobreescribira al interno en la vista si esta configurado)
  */
 package HeartsMonitor;
@@ -8,8 +9,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javafx.scene.Node;
 
 /**
  *
@@ -20,8 +23,8 @@ public class ReceptorTCP extends Receptor {
     private Socket conexion;
     private String nombreAMostrar;
 
-    public ReceptorTCP(int puerto, String nombre) {
-        super(puerto, nombre);
+    public ReceptorTCP(int puerto, String nombre, Node panel, Node texto, Node barra) {
+        super(puerto, nombre, panel, texto, barra);
         nombreAMostrar = null;
         System.out.println("Hilo iniciado para " + nombre + ".");
     }
@@ -33,30 +36,35 @@ public class ReceptorTCP extends Receptor {
         ejecutarse = true;
         InputStream entrada;
         
-        try{
-            conexion = establecerConexion();
-            entrada = conexion.getInputStream();
-            System.out.println("LOG: Conexión TCP aceptada.");
-            
-            //Bucle de ejecución. Espera una respuesta y actualiza los latidos.
-            while(ejecutarse){
-                latidos = entrada.read();
-                if(latidos == -1){
-                    //La conexión se ha cerrado. Informa y detiene el hilo.
-                    System.out.println("Conexión con " + nombre + " finalizada.");
-                    ejecutarse = false;
-                }
-            }
-            
-            //Código cuando se ha ordenado el cierre del hilo
-            System.out.println("Hilo de " + nombre + " cerrado.");
+        //Bucle de ejecución.
+        while(ejecutarse){
+            onLatidosChange();
+            try{
+                conexion = establecerConexion();
+                entrada = conexion.getInputStream();
+                System.out.println("Conexión TCP aceptada para " + nombre + ".");
 
-        }catch(IOException e){
+                //Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
+                do{
+                    latidos = entrada.read();
+                    onLatidosChange();
+                }while(latidos != -1);
+                
+                System.out.println("Conexión con " + nombre + " finalizada.");
+            }catch(BindException e){
+                //Puerto ocupado. El programa espera 10 segundos entre intentos de conexión. TODO
+                //esperar 10 seg
+                System.out.println("\n\nEl puerto para " + nombre + " está ocupado.\n");
+                e.printStackTrace();
+            }catch(IOException e){
+                System.out.println("\n\nLa conexión con " + nombre + " ha caído.\n");
+                e.printStackTrace();
+            }
             latidos = -1;
-            ejecutarse = false;
-            System.out.println("\n\nLa conexión con " + nombre + " ha caído.\n");
-            e.printStackTrace();
         }
+        
+        //Código cuando se ha ordenado el cierre del hilo
+        System.out.println("Hilo de " + nombre + " cerrado.");
     }
     
     //Establece la conexion con un dispositivo
@@ -106,13 +114,12 @@ public class ReceptorTCP extends Receptor {
     @Override
     //Detiene el receptor
     public void detener(){
+        ejecutarse = false;
         try {
             conexion.close();
-            //ejecutarse se pone a false al cerrar la conexión
         } catch (IOException e) {
             System.out.println("\n\nError al cerrar la conexión de " + nombre + ".\n");
             e.printStackTrace();
-            //hacer que el hilo se cierre de golpe
         }
     }
 }

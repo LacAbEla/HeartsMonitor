@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+      <Pane layoutX="14.0" layoutY="14.0" prefHeight="91.0" prefWidth="200.0">
+         <children>
+            <Text layoutX="84.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text">
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Text>
+            <Button layoutX="175.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="0.0" text="B" />
+            <ProgressBar layoutY="66.0" prefWidth="200.0" />
+         </children>
+      </Pane>
