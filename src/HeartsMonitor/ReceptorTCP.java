@@ -12,7 +12,9 @@ import java.io.InputStreamReader;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import javafx.scene.Node;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 
 /**
  *
@@ -23,10 +25,10 @@ public class ReceptorTCP extends Receptor {
     private Socket conexion;
     private String nombreAMostrar;
 
-    public ReceptorTCP(int puerto, String nombre, Node panel, Node texto, Node barra) {
-        super(puerto, nombre, panel, texto, barra);
+    public ReceptorTCP(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra) {
+        super(puerto, nombre, panel, textoNombre, textoLatidos, barra);
         nombreAMostrar = null;
-        System.out.println("Hilo iniciado para " + nombre + ".");
+        System.out.println("Hilo TCP iniciado para " + nombre + " en puerto " + puerto + ".");
     }
     
     
@@ -38,7 +40,7 @@ public class ReceptorTCP extends Receptor {
         
         //Bucle de ejecución.
         while(ejecutarse){
-            onLatidosChange();
+            onLatidosChanged();
             try{
                 conexion = establecerConexion();
                 entrada = conexion.getInputStream();
@@ -47,31 +49,30 @@ public class ReceptorTCP extends Receptor {
                 //Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
                 do{
                     latidos = entrada.read();
-                    onLatidosChange();
+                    onLatidosChanged();
                 }while(latidos != -1);
                 
                 System.out.println("Conexión con " + nombre + " finalizada.");
             }catch(BindException e){
-                //Puerto ocupado. El programa espera 10 segundos entre intentos de conexión. TODO
-                //esperar 10 seg
-                System.out.println("\n\nEl puerto para " + nombre + " está ocupado.\n");
-                e.printStackTrace();
+                //Puerto ocupado. El programa espera 5 segundos entre intentos de conexión.
+                System.out.println("ERROR: El puerto (" + puerto + ") para " + nombre +  " está ocupado.");
+                try {Thread.sleep(5000);} catch (InterruptedException ex) {}
             }catch(IOException e){
-                System.out.println("\n\nLa conexión con " + nombre + " ha caído.\n");
+                System.out.println("\n\nERROR: La conexión con " + nombre + " ha caído.\n");
                 e.printStackTrace();
             }
             latidos = -1;
         }
         
         //Código cuando se ha ordenado el cierre del hilo
-        System.out.println("Hilo de " + nombre + " cerrado.");
+        System.out.println("Hilo TCP de " + nombre + " cerrado.");
     }
     
     //Establece la conexion con un dispositivo
     //TODO/NOTA: cuando se establece una conexion TCP el dispositivo envia una ID textual y luego los datos de latidos cada 500ms (no obligatorio).
     //Esta ID se utilizara para saber si el dispositivo es el adecuado o no.
     //Si ID esperada == null entonces se acepta cualquiera.
-    private Socket establecerConexion() throws IOException{
+    private Socket establecerConexion() throws IOException{ //Este IOException incluye un BindException controlado en run()
         ServerSocket servidor = new ServerSocket(puerto);
         Socket conexion;
         while(true){
@@ -80,6 +81,7 @@ public class ReceptorTCP extends Receptor {
             if(nombre == null){
                 //No hay nombre. Se adopta el de la conexión y se acepta.
                 nombre = leerNombre(conexion.getInputStream());
+                onNombreChanged();
                 return conexion;
             }else if(leerNombre(conexion.getInputStream()).equals(nombre)){
                 //Hay nombre. Se acepta la conexión al coincidir el nombre.

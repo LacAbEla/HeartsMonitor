@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import javafx.scene.Node;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 
 /**
  *
@@ -16,12 +18,12 @@ import javafx.scene.Node;
  */
 public class ReceptorUDP extends Receptor {
     
-    private final DatagramSocket conexion;
+    private DatagramSocket conexion;
 
-    public ReceptorUDP(int puerto, String nombre, Node panel, Node texto, Node barra) throws SocketException {
-        super(puerto, nombre, panel, texto, barra);
-        this.conexion = new DatagramSocket(puerto);
-        System.out.println("Hilo iniciado para " + nombre + ".");
+    //TODO quitar la exception y mover el intento de conexion al bucle de ejecucion
+    public ReceptorUDP(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra)throws SocketException {
+        super(puerto, nombre, panel, textoNombre, textoLatidos, barra);
+        System.out.println("Hilo UDP iniciado para " + nombre + " en puerto " + puerto + ".");
     }
     
     
@@ -30,20 +32,35 @@ public class ReceptorUDP extends Receptor {
     public void run(){
         ejecutarse = true;
         
-        //Bucle de ejecución. Espera una respuesta y actualiza los latidos.
+        //Bucle de ejecución. Establece una conexión, espera una respuesta y actualiza los latidos.
         while(ejecutarse){
-            onLatidosChange();
+            onLatidosChanged();
             try{
-                //Nota: el buffer (new byte[1]) y paquete.getData() son lo mismo.)
-                DatagramPacket paquete = new DatagramPacket(new byte[1], 1);
-                conexion.receive(paquete);
-                latidos = paquete.getData()[0]+128; //Al enviarse un byte por UDP en java se transmite con signo. Hace falta operar para eliminarlo.
-                onLatidosChange();
-            }catch(IOException e){
-                System.out.println("Error al leer un paquete UDP de " + nombre + ".");
+                conexion = new DatagramSocket(puerto);
+                System.out.println("Escucha UDP iniciada en " + puerto + " para " + nombre + ".");
+                DatagramPacket paquete = new DatagramPacket(new byte[1], 1); //Nota: el buffer (new byte[1]) y paquete.getData() son lo mismo.)
+                
+                try{
+                    //Espera una respuesta y actualiza los latidos.
+                    while(ejecutarse){
+                        conexion.receive(paquete);
+                        latidos = paquete.getData()[0]+128; //Al enviarse un byte por UDP en java se transmite con signo. Hace falta operar para eliminarlo.
+                        onLatidosChanged();
+                    }
+                }catch(IOException e){
+                    System.out.println("\n\nError al leer un paquete UDP de " + nombre + ".\n");
+                    e.printStackTrace();
+                }
+            }catch(SocketException e){
+                //Puerto ocupado. El programa espera 5 segundos entre intentos de conexión.
+                System.out.println("\n\nEl puerto (" + puerto + ") para " + nombre +  " está ocupado.\n");
                 e.printStackTrace();
+                try {Thread.sleep(5000);} catch (InterruptedException ex) {}
             }
         }
+        
+        //Código cuando se ha ordenado el cierre del hilo
+        System.out.println("Hilo UDP de " + nombre + " cerrado.");
     }
     
     @Override

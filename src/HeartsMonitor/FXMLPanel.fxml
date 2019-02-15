@@ -7,14 +7,15 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-      <Pane layoutX="14.0" layoutY="14.0" prefHeight="91.0" prefWidth="200.0">
-         <children>
-            <Text layoutX="84.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text">
-               <font>
-                  <Font size="17.0" />
-               </font>
-            </Text>
-            <Button layoutX="175.0" layoutY="2.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="0.0" text="B" />
-            <ProgressBar layoutY="66.0" prefWidth="200.0" />
-         </children>
-      </Pane>
+<Pane prefHeight="91.0" prefWidth="200.0" style="-fx-background-color: red;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text fx:id="nombre" layoutX="12.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </Text>
+      <Button fx:id="borrar" layoutX="218.0" layoutY="6.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="0.0" text="B" />
+      <ProgressBar fx:id="barra" layoutX="43.0" layoutY="70.0" prefWidth="200.0" progress="0.02" />
+      <Text fx:id="latidos" layoutX="137.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-1" />
+   </children>
+</Pane>

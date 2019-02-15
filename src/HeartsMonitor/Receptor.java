@@ -6,7 +6,6 @@ TODO: añadir el control temporal (aviso cuando pasen más de 3 segundos sin nue
 package HeartsMonitor;
 
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
@@ -22,21 +21,24 @@ public abstract class Receptor implements Runnable {
     protected int puerto;
     protected String nombre;
     
-    //PLACEHOLDER
+    //posible PLACEHOLDER
     protected Pane panel;
-    protected Text texto;
+    protected Text textoNombre, textoLatidos;
     protected ProgressBar barra;
 
-    public Receptor(int puerto, String nombre, Node panel, Node texto, Node barra) {
+    public Receptor(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra) {
         ejecutarse = false;
         latidos = -1;
         this.puerto = puerto;
         this.nombre = nombre;
         
-        //PLACEHOLDER
-        this.panel = (Pane)panel;
-        this.texto = (Text)texto;
-        this.barra = (ProgressBar)barra;
+        //posible PLACEHOLDER
+        this.panel = panel;
+        this.textoNombre = textoNombre;
+        this.textoLatidos = textoLatidos;
+        this.barra = barra;
+        
+        onNombreChanged();
     }
     
     
@@ -50,21 +52,24 @@ public abstract class Receptor implements Runnable {
         return nombre;
     }
     
+    //Cambiar el nombre de la conexión
     public void setNombre(String valor){
         nombre = valor;
+        onNombreChanged();
     }
     
+    //Indica si el receptor está en ejecución
     public boolean isEjecutando(){
         return ejecutarse;
     }
     
     //Código a ejecutar cuando cambia el número de latidos
-    public void onLatidosChange(){
+    protected void onLatidosChanged(){
         //PLACEHOLDER
         Platform.runLater(new Runnable(){
             @Override
             public void run() {
-                texto.setText(latidos+"");
+                textoLatidos.setText(latidos+"");
                 if(latidos == -1)
                     barra.setProgress(-1);
                 else
@@ -81,6 +86,10 @@ public abstract class Receptor implements Runnable {
                     panel.setStyle("-fx-background-color:green;");
             }
         });
+    }
+    
+    protected void onNombreChanged(){
+        textoNombre.setText(nombre);
     }
     
     //Ordena al receptor que se detenga.

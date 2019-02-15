@@ -9,7 +9,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HeartsMonitor.FXMLController">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HeartsMonitor.ControladorFXML">
     <stylesheets>
         <URL value="@fxml.css" />
     </stylesheets>
@@ -24,32 +24,10 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
-         <children>
-            <Pane fx:id="paneltcp" prefHeight="91.0" prefWidth="200.0" style="-fx-background-color: red;">
-               <children>
-                  <Text layoutX="113.0" layoutY="24.0" strokeType="OUTSIDE" strokeWidth="0.0" text="TestTCP">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                  </Text>
-                  <Button layoutX="218.0" layoutY="6.0" mnemonicParsing="false" onAction="#borrarTCP" prefHeight="25.0" prefWidth="0.0" text="B" />
-                  <ProgressBar fx:id="barratcp" layoutX="43.0" layoutY="70.0" prefWidth="200.0" progress="0.0" />
-                  <Text fx:id="textotcp" layoutX="132.0" layoutY="64.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
-               </children>
-            </Pane>
-            <Pane fx:id="paneludp" prefHeight="91.0" prefWidth="200.0" style="-fx-background-color: red;" GridPane.columnIndex="1">
-               <children>
-                  <Text layoutX="111.0" layoutY="25.0" strokeType="OUTSIDE" strokeWidth="0.0" text="TestUDP">
-                     <font>
-                        <Font size="17.0" />
-                     </font>
-                  </Text>
-                  <Button layoutX="218.0" layoutY="6.0" mnemonicParsing="false" onAction="#borrarUDP" prefHeight="25.0" prefWidth="0.0" text="B" />
-                  <ProgressBar fx:id="barraudp" layoutX="43.0" layoutY="70.0" prefWidth="200.0" progress="0.02" />
-                  <Text fx:id="textoudp" layoutX="132.0" layoutY="64.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
-               </children>
-            </Pane>
-         </children>
       </GridPane>
+      <TextField fx:id="inputPuerto" layoutX="65.0" layoutY="342.0" prefHeight="25.0" prefWidth="52.0" promptText="Puerto" />
+      <TextField fx:id="inputNombre" layoutX="133.0" layoutY="342.0" prefHeight="25.0" prefWidth="206.0" promptText="Nombre" />
+      <Button layoutX="366.0" layoutY="342.0" mnemonicParsing="false" onAction="#anadirConexionTCP" text="Añadir TCP" />
+      <Button layoutX="457.0" layoutY="342.0" mnemonicParsing="false" onAction="#anadirConexionUDP" text="Añadir UDP" />
    </children>
 </AnchorPane>
