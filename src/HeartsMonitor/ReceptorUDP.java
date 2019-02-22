@@ -47,6 +47,8 @@ public class ReceptorUDP extends Receptor {
                         latidos = paquete.getData()[0]+128; //Al enviarse un byte por UDP en java se transmite con signo. Hace falta operar para eliminarlo.
                         onLatidosChanged();
                     }
+                }catch(SocketException e){
+                    //TODO hacer que esto solo ignore la excepción causada por "socket closed"
                 }catch(IOException e){
                     System.out.println("\n\nError al leer un paquete UDP de " + nombre + ".\n");
                     e.printStackTrace();
@@ -68,6 +70,5 @@ public class ReceptorUDP extends Receptor {
     public void detener(){
         ejecutarse = false;
         conexion.close();
-        System.out.println("Hilo de " + nombre + " cerrado.");
     }
 }

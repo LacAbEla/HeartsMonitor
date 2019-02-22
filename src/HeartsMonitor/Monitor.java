@@ -27,15 +27,25 @@ import javafx.stage.Stage;
  */
 public class Monitor extends Application{
     
+    ControladorFXML controlador;
+    
     @Override
     //Líneas ejecutadas por el hilo de la vista al iniciar la aplicación JavaFX.
     //A partir del final de start() el hilo de la vista pasa a controlar la vista y no puede usarse para la aplicación.
     public void start(Stage stage) throws IOException, InterruptedException {
-        Parent root = FXMLLoader.load(getClass().getResource("FXML.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("FXML.fxml"));
+        Parent root = loader.load();
+        controlador = loader.getController();
         Scene scene = new Scene(root);
         
         stage.setScene(scene);
         stage.show();
+    }
+    
+    //Líneas ejecutadas por el hilo de la vista cuando la aplicación se queda sin ventanas
+    @Override
+    public void stop(){
+        controlador.detener();
     }
     
     //No se utiliza en JavaFX, pero no ponerlo dará error en ciertos entornos, como al ejecutar en el IDE.

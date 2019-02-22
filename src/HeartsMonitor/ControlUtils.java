@@ -106,7 +106,7 @@ public class ControlUtils {
             hilo.detener();
             
         //Espera de 3 segundos para dar tiempo a los hilos de cerrarse.
-        //TODO tener en cuenta que algunos hilos podrían estar en la espera de 10 segundos por puerto ocupado.
+        //TODO tener en cuenta que algunos hilos podrían estar en la espera de 5 segundos por puerto ocupado.
         //Habría que interrumpirlos, esperar más tiempo o hacer que esperen menos entre intenros.
         try {Thread.sleep(3000);} catch (InterruptedException e) {}
         

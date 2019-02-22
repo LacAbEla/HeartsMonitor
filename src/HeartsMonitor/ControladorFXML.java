@@ -53,6 +53,11 @@ public class ControladorFXML implements Initializable {
         utils.anadirConexionUDP(Integer.parseInt(inputPuerto.getText()), inputNombre.getText());
     }
     
+    //Código a ejecutar para detener el controlador. Ejecutado por la clase principal.
+    public void detener(){
+        utils.detenerReceptores();
+    }
+    
     
     /*
     Conservado por si hace falta en un futuro.

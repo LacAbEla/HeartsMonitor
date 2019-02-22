@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
@@ -22,12 +23,12 @@ import javafx.scene.text.Text;
  */
 public class ReceptorTCP extends Receptor {
     
+    private ServerSocket servidor;
     private Socket conexion;
     private String nombreAMostrar;
 
     public ReceptorTCP(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra) {
         super(puerto, nombre, panel, textoNombre, textoLatidos, barra);
-        nombreAMostrar = null;
         System.out.println("Hilo TCP iniciado para " + nombre + " en puerto " + puerto + ".");
     }
     
@@ -38,29 +39,42 @@ public class ReceptorTCP extends Receptor {
         ejecutarse = true;
         InputStream entrada;
         
-        //Bucle de ejecución.
-        while(ejecutarse){
-            onLatidosChanged();
+        //Bucle para adquirir el puerto
+        while(servidor == null){
             try{
-                conexion = establecerConexion();
-                entrada = conexion.getInputStream();
-                System.out.println("Conexión TCP aceptada para " + nombre + ".");
-
-                //Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
-                do{
-                    latidos = entrada.read();
-                    onLatidosChanged();
-                }while(latidos != -1);
-                
-                System.out.println("Conexión con " + nombre + " finalizada.");
+                servidor = new ServerSocket(puerto);
             }catch(BindException e){
                 //Puerto ocupado. El programa espera 5 segundos entre intentos de conexión.
                 System.out.println("ERROR: El puerto (" + puerto + ") para " + nombre +  " está ocupado.");
                 try {Thread.sleep(5000);} catch (InterruptedException ex) {}
             }catch(IOException e){
-                System.out.println("\n\nERROR: La conexión con " + nombre + " ha caído.\n");
+                System.out.println("\n\nERROR al intentar aceptar conexiones en el puerto " + puerto + ".\n");
                 e.printStackTrace();
             }
+        }
+        
+        //Bucle de ejecución.
+        while(ejecutarse){
+            onLatidosChanged();
+            try{
+                conexion = establecerConexion();
+                //Check para asegurarse de que aun hay que seguir
+                if(ejecutarse && conexion != null){
+                    entrada = conexion.getInputStream();
+                    System.out.println("Conexión TCP aceptada para " + nombre + ".");
+
+                    //Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
+                    do{
+                        latidos = entrada.read();
+                        onLatidosChanged();
+                    }while(latidos != -1);
+
+                    System.out.println("Conexión con " + nombre + " finalizada.");
+                }
+            }catch(IOException e){
+                System.out.println("\n\nERROR: La conexión con " + nombre + " ha caído.\n");
+                e.printStackTrace();
+            }//TODO controlar SocketException causada por "socket closed" para que no se muestre, pues es normal al cerrar el hilo
             latidos = -1;
         }
         
@@ -72,12 +86,17 @@ public class ReceptorTCP extends Receptor {
     //TODO/NOTA: cuando se establece una conexion TCP el dispositivo envia una ID textual y luego los datos de latidos cada 500ms (no obligatorio).
     //Esta ID se utilizara para saber si el dispositivo es el adecuado o no.
     //Si ID esperada == null entonces se acepta cualquiera.
-    private Socket establecerConexion() throws IOException{ //Este IOException incluye un BindException controlado en run()
-        ServerSocket servidor = new ServerSocket(puerto);
-        Socket conexion;
+    private Socket establecerConexion() throws IOException{
         while(true){
-            conexion = servidor.accept();
-                System.out.println("LOG: Conexión TCP establecida");
+            //Se ignora SocketException en este ámbito porque es causada por "socket closed" al cerrar el hilo
+            //posible TODO: controlar que la SocketException sea causada por "socket closed" y hacerlo en el run(). Nota: e.getCause() no sirve para esto.
+            //podria controlarlo con getMessage() --> si el mensaje empiexa por...
+            try{
+                conexion = servidor.accept();
+            }catch(SocketException e){
+                return null;
+            }
+            System.out.println("LOG: Conexión TCP establecida");
             if(nombre == null){
                 //No hay nombre. Se adopta el de la conexión y se acepta.
                 nombre = leerNombre(conexion.getInputStream());
@@ -113,12 +132,24 @@ public class ReceptorTCP extends Receptor {
         nombreAMostrar = nombre;
     }
     
+    
+    @Override
+    protected void onNombreChanged(){
+        if(nombreAMostrar != null)
+            textoNombre.setText(nombreAMostrar);
+        else
+            textoNombre.setText(nombre);
+    }
+    
     @Override
     //Detiene el receptor
     public void detener(){
         ejecutarse = false;
         try {
-            conexion.close();
+            if(latidos != -1) //TODO existe la absurdamente pequeña posibilidad de que una conexión se cierre antes de que los latidos se pongan en -1.
+                conexion.close();
+            if(servidor != null) //TODO? que sepa no existe la posibilidad de que un ServerSocket se cierre por si solo, por lo que esto no debería dar problemas.
+                servidor.close();
         } catch (IOException e) {
             System.out.println("\n\nError al cerrar la conexión de " + nombre + ".\n");
             e.printStackTrace();
