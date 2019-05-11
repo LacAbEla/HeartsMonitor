@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
 
-//TODO que el botón de cerrar lo cierre todo
-//TODO que se puedan borrar conexiones
+// TODO que el botón de cerrar lo cierre todo
+// TODO que se puedan borrar conexiones
  */
 package HeartsMonitor;
 
@@ -20,7 +20,7 @@ import javafx.scene.layout.GridPane;
  *
  * @author Alejandro Balaguer Calderón
  */
-public class ControladorFXML implements Initializable {
+public class ControladorFX implements Initializable {
 
     /**
      * Initializes the controller class.

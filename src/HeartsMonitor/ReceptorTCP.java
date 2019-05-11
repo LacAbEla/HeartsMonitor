@@ -58,24 +58,25 @@ public class ReceptorTCP extends Receptor {
             onLatidosChanged();
             try{
                 conexion = establecerConexion();
-                //Check para asegurarse de que aun hay que seguir
+                // Check para asegurarse de que aun hay que seguir
                 if(ejecutarse && conexion != null){
                     entrada = conexion.getInputStream();
+                    mostrarAlerta = true; // Permitir alertas a partir de este punto
                     System.out.println("Conexión TCP aceptada para " + nombre + ".");
 
-                    //Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
+                    // Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
                     do{
                         latidos = entrada.read();
                         onLatidosChanged();
-                    }while(latidos != -1);
+                    }while(latidos != -1 && ejecutarse);
 
                     System.out.println("Conexión con " + nombre + " finalizada.");
                 }
             }catch(IOException e){
+                latidos = -1;
                 System.out.println("\n\nERROR: La conexión con " + nombre + " ha caído.\n");
                 e.printStackTrace();
             }//TODO controlar SocketException causada por "socket closed" para que no se muestre, pues es normal al cerrar el hilo
-            latidos = -1;
         }
         
         //Código cuando se ha ordenado el cierre del hilo
@@ -97,6 +98,7 @@ public class ReceptorTCP extends Receptor {
                 return null;
             }
             System.out.println("LOG: Conexión TCP establecida");
+            conexion.setSoTimeout(timeoutConexion);
             if(nombre == null){
                 //No hay nombre. Se adopta el de la conexión y se acepta.
                 nombre = leerNombre(conexion.getInputStream());

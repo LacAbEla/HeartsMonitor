@@ -7,8 +7,10 @@ package HeartsMonitor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -23,7 +25,7 @@ public class ControlUtils {
     private final GridPane panelConexiones;
     private final ArrayList<Receptor> receptores;
     
-    //PLACEHOLDER
+    // PLACEHOLDER
     private int panelX;
     private int panelY;
     
@@ -35,7 +37,7 @@ public class ControlUtils {
         panelY = 0;
     }
     
-    //Añade una conexión TCP o UDP en función de la variable booleana. (true -> TCP, false -> UDP)
+    // Añade una conexión TCP o UDP en función de la variable booleana. (true -> TCP, false -> UDP)
     private boolean anadirConexion(int puerto, String nombre, boolean TCP){
         Receptor receptor;
         Pane panel;
@@ -46,9 +48,9 @@ public class ControlUtils {
         if(nombre.equals(""))
             nombre = null;
         
-        //PLACEHOLDER, es una versión poco pulida de lo que (seguramente) será en el futuro
+        // PLACEHOLDER, es una versión poco pulida de lo que (seguramente) será en el futuro
         try {
-            //Crear y añadir panel
+            // Crear y añadir panel
             panel = FXMLLoader.load(getClass().getResource("FXMLPanel.fxml"));
             panel.setId(nombre);
             for(Node nodo : panel.getChildren()){
@@ -64,13 +66,13 @@ public class ControlUtils {
                     barra = (ProgressBar)nodo;
             }
             panelConexiones.add(panel, panelX, panelY);
-            panelX += 1;
+            panelX++;
             if(panelX == 2){
                 panelX = 0;
-                panelY +=1;
+                panelY++;
             }
             
-            //Crear y añadir hilo
+            // Crear y añadir hilo
             if(TCP)
                 receptor = new ReceptorTCP(puerto, nombre, panel, textoNombre, textoLatidos, barra);
             else
@@ -78,7 +80,7 @@ public class ControlUtils {
             receptores.add(receptor);
             Thread hilo = new Thread(receptor);
             hilo.start();
-            System.out.println("Hilo TCP iniciado.");
+            System.out.println("Hilo iniciado.");
             return true;
         } catch (IOException e) {
             System.out.println("\n\nError al leer FXMLPanel.fxml.\n");
@@ -87,34 +89,46 @@ public class ControlUtils {
         return false;
     }
     
-    //Añade una conexión TCP.
+    // Añade una conexión TCP.
     public boolean anadirConexionTCP(int puerto, String nombre){
         return anadirConexion(puerto, nombre, true);
     }
     
-    //Añade una conexión UDP.
+    // Añade una conexión UDP.
     public boolean anadirConexionUDP(int puerto, String nombre){
         return anadirConexion(puerto, nombre, false);
     }
 
-    //Cierra todos los hilos receptores.
+    // Cierra todos los hilos receptores.
     public void detenerReceptores(){
         System.out.println("Deteniendo conexiones...");
         
-        //Detiene todos los hilos receptores
+        // Detiene todos los hilos receptores
         for(Receptor hilo : receptores)
             hilo.detener();
             
-        //Espera de 3 segundos para dar tiempo a los hilos de cerrarse.
-        //TODO tener en cuenta que algunos hilos podrían estar en la espera de 5 segundos por puerto ocupado.
-        //Habría que interrumpirlos, esperar más tiempo o hacer que esperen menos entre intenros.
+        // Espera de 3 segundos para dar tiempo a los hilos de cerrarse.
+        // TODO tener en cuenta que algunos hilos podrían estar en la espera de 5 segundos por puerto ocupado.
+        // Habría que interrumpirlos, esperar más tiempo o hacer que esperen menos entre intenros.
         try {Thread.sleep(3000);} catch (InterruptedException e) {}
         
         System.out.println("Conexiones cerradas.");
     }
     
-    //Es, y solo es, posible que se haya vuelto inutil
+    // Es, y solo es, posible que se haya vuelto inutil
     public Receptor[] getConexiones(){
         return receptores.toArray(new Receptor[0]);
+    }
+    
+    // Muestra un mensaje de error al usuario
+    public static void alertarError(String titulo, String mensaje){
+        Platform.runLater(new Runnable(){
+            public void run(){
+                Alert alerta = new Alert(Alert.AlertType.ERROR);
+                alerta.setTitle(titulo);
+                alerta.setHeaderText(mensaje);
+                alerta.show();
+            }
+        });
     }
 }
