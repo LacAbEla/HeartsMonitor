@@ -27,7 +27,7 @@ import javafx.stage.Stage;
  */
 public class Monitor extends Application{
     
-    ControladorFX controlador;
+    ControladorFXML controlador;
     
     @Override
     //Líneas ejecutadas por el hilo de la vista al iniciar la aplicación JavaFX.

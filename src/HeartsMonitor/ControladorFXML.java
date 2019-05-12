@@ -20,7 +20,7 @@ import javafx.scene.layout.GridPane;
  *
  * @author Alejandro Balaguer Calderón
  */
-public class ControladorFX implements Initializable {
+public class ControladorFXML implements Initializable {
 
     /**
      * Initializes the controller class.
