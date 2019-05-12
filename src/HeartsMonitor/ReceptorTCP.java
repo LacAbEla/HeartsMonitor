@@ -13,19 +13,20 @@ import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 
 /**
- *
+ * Clase para la recepción de datos mediante TCP
+ * 
  * @author Alejandro Balaguer Calderón
  */
 public class ReceptorTCP extends Receptor {
     
     private ServerSocket servidor;
     private Socket conexion;
-    private String nombreAMostrar;
 
     public ReceptorTCP(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra) {
         super(puerto, nombre, panel, textoNombre, textoLatidos, barra);
@@ -51,7 +52,8 @@ public class ReceptorTCP extends Receptor {
                 System.out.println("\n\nERROR al intentar aceptar conexiones en el puerto " + puerto + ".\n");
                 e.printStackTrace();
             }
-        }
+        } //TODO: si el puerto esta ocupado podria borrarse el dispositivo y listo
+        // o casi mejor mostrarlo porque eso chocaría con lo de guardar dispositivos
         
         //Bucle de ejecución.
         while(ejecutarse){
@@ -61,23 +63,30 @@ public class ReceptorTCP extends Receptor {
                 // Check para asegurarse de que aun hay que seguir
                 if(ejecutarse && conexion != null){
                     entrada = conexion.getInputStream();
-                    mostrarAlerta = true; // Permitir alertas a partir de este punto
                     System.out.println("Conexión TCP aceptada para " + nombre + ".");
 
                     // Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
                     do{
-                        latidos = entrada.read();
+                        try{
+                            latidos = entrada.read();
+                        }catch(SocketTimeoutException e){
+                            System.out.println("\n" + nombre + " está tardando demasiado en responder.");
+                            latidos = -1;
+                        }catch(IOException e){
+                            System.out.println("\n\nError E/S al leer un paquete TCP de " + nombre + ".\n");
+                            e.printStackTrace();
+                            latidos = -1;
+                        }
                         onLatidosChanged();
-                    }while(latidos != -1 && ejecutarse);
-
+                    }while(latidos != -1 && ejecutarse); //TODO por que usé un do-while en lugar de while?
                     System.out.println("Conexión con " + nombre + " finalizada.");
                 }
             }catch(IOException e){
-                latidos = -1;
-                System.out.println("\n\nERROR: La conexión con " + nombre + " ha caído.\n");
+                System.out.println("\n\nERROR al establecer conexión con " + nombre + ".\n");
                 e.printStackTrace();
-            }//TODO controlar SocketException causada por "socket closed" para que no se muestre, pues es normal al cerrar el hilo
-        }
+            }
+            latidos = -1;
+        }//TODO: testear que todo en este método (run()) funciona correctamente
         
         //Código cuando se ha ordenado el cierre del hilo
         System.out.println("Hilo TCP de " + nombre + " cerrado.");
@@ -119,42 +128,5 @@ public class ReceptorTCP extends Receptor {
     private String leerNombre(InputStream is) throws IOException{
         BufferedReader entrada = new BufferedReader(new InputStreamReader(is));
         return entrada.readLine();
-    }
-    
-    //Devuelve el nombre a mostrar por el objeto.
-    public String getNombreAMostrar(){
-        if(nombreAMostrar != null)
-            return nombreAMostrar;
-        else
-            return nombre;
-    }
-    
-    //Cambiar nombre a mostrar. null -> nombre normal mostrado
-    public void setNombreAMostrar(String nombre){
-        nombreAMostrar = nombre;
-    }
-    
-    
-    @Override
-    protected void onNombreChanged(){
-        if(nombreAMostrar != null)
-            textoNombre.setText(nombreAMostrar);
-        else
-            textoNombre.setText(nombre);
-    }
-    
-    @Override
-    //Detiene el receptor
-    public void detener(){
-        ejecutarse = false;
-        try {
-            if(latidos != -1) //TODO existe la absurdamente pequeña posibilidad de que una conexión se cierre antes de que los latidos se pongan en -1.
-                conexion.close();
-            if(servidor != null) //TODO? que sepa no existe la posibilidad de que un ServerSocket se cierre por si solo, por lo que esto no debería dar problemas.
-                servidor.close();
-        } catch (IOException e) {
-            System.out.println("\n\nError al cerrar la conexión de " + nombre + ".\n");
-            e.printStackTrace();
-        }
     }
 }

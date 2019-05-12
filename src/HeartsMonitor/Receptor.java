@@ -16,6 +16,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.Line;
 
 /**
+ * Clase base para la recepción de datos
  *
  * @author aleba
  */
@@ -28,13 +29,12 @@ public abstract class Receptor implements Runnable {
     protected int timeoutConexion; // Tiempo de respuesta máximo (en milisegundos) para la recepción de datos.
     protected boolean mostrarAlerta; // Se utiliza para evitar mostrar un aviso de desconexión/latidos anormales mientras se espera a establecer la conexión por primera vez.
     
-    private Clip sonido;
+    private static volatile Clip sonido; // Volatile es como synchronized pero para variables, aunque no funcionan exactamente igual.
     
     //posible PLACEHOLDER
     protected Pane panel;
     protected Text textoNombre, textoLatidos;
     protected ProgressBar barra;
-
     
     public Receptor(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra) {
         ejecutarse = true; // Se mantiene true para indicarle al hilo que se crea más adelante que debe continuar funcionando.
@@ -44,13 +44,16 @@ public abstract class Receptor implements Runnable {
         timeoutConexion = 3000;
         mostrarAlerta = false; // Se mantendrá false hasta que se establezca la conexión por primera vez.
         
-        // TODO MOVER A VARIABLES GLOBALES O ALGO
         // TODO: incluir un sonido con el programa
-        try{
-            sonido = (Clip)AudioSystem.getLine(new Line.Info(Clip.class));
-            sonido.open(AudioSystem.getAudioInputStream(new File("C:\\Windows\\media\\chord.wav")));
-        }catch(Exception e){
-            
+        // Si el Clip para el sonido no ha sido iniciado, hacerlo.
+        if(sonido == null){
+            try{
+                sonido = (Clip)AudioSystem.getLine(new Line.Info(Clip.class));
+                sonido.open(AudioSystem.getAudioInputStream(new File("C:\\Windows\\media\\chord.wav")));
+            }catch(Exception e){
+                sonido = null;
+                ControlUtils.alertarError("Error de sonido", "Ha habido un error al intentar añadir la función de alerta sonora.\nInformación para el desarrollador:\n" + e.toString());
+            }
         }
         
         // posible PLACEHOLDER
@@ -63,6 +66,100 @@ public abstract class Receptor implements Runnable {
     }
     
     
+    
+    
+// Código a ejecutar cuando cambia el número de latidos/minuto
+    protected void onLatidosChanged(){
+        // PLACEHOLDER
+        Platform.runLater(new Runnable(){
+            @Override
+            public void run() {
+                // Ejecutar código en función del estado de los latidos
+                if(latidos<Config.getLatidosBajo() || latidos>Config.getLatidosAlto() || latidos==-1)
+                    onLatidosEmergencia();
+                else if(latidos<Config.getLatidosBajo()+10 || latidos>Config.getLatidosAlto()-15)
+                    onLatidosAviso();
+                else
+                    onLatidosBien();
+                
+                //Actualizar número de latidos y barra
+                if(latidos == -1){
+                    textoLatidos.setText("¡DESCONECTADO!");
+                    barra.setProgress(-1);
+                }else{
+                    textoLatidos.setText(latidos+"");
+                    barra.setProgress(latidos/255.0);
+                }
+            }
+        });
+    }
+    
+    protected void onLatidosEmergencia(){
+        panel.setStyle("-fx-background-color:red;");
+        alertar();
+    }
+    
+    protected void onLatidosAviso(){
+        panel.setStyle("-fx-background-color:yellow;");
+    }
+    
+    protected void onLatidosBien(){
+        panel.setStyle("-fx-background-color:green;");
+        mostrarAlerta = true; // Vuelve a permitir mostrar una alerta después de entrar en un periodo de valores anormales
+                              // (eso evita que aparezca la alerta cada vez que se ejecuta onLatidosChanged).
+    }
+    
+    
+    
+    
+    // Ejecuta las acciones de alerta
+    // SOLO LLAMAR DESDE HILOS JavaFX (usar Platform.runLater).
+    protected void alertar(){
+        boolean tieneSonido = false; // Indica si este diálogo utiliza el sonido. El sonido solo se utilizará por un diálogo a la vez.
+        
+        if(mostrarAlerta){
+            Alert alerta = new Alert(Alert.AlertType.WARNING);
+            alerta.setTitle("¡EMERGENCIA!");
+            if(latidos == -1)
+                alerta.setHeaderText("¡El dispositivo " + nombre + " se ha desconectado o no responde!");
+            else if(latidos<45)
+                alerta.setHeaderText("¡Las pulsaciones de " + nombre + " son demasiado bajas!");
+            else
+                alerta.setHeaderText("¡Las pulsaciones de " + nombre + " son demasiado altas!");
+
+            // Reinicia el estado del sonido y comienza a reproducirlo. No lo hace si el sonido ya ha sido iniciado por otro diálogo.
+            // De esta forma el sonido siempre se controla por el primer diálogo. El showAndWait se aplica a toda la aplicación, por lo que
+            // el diálogo del sonido estará bloqueado (no se podrá cerrar) hasta que no se cierren todos diálogos que haya por encima.
+            if(!sonido.isRunning()){
+                sonido.setFramePosition(0);
+                sonido.loop(Clip.LOOP_CONTINUOUSLY);
+                tieneSonido = true;
+            }
+
+            mostrarAlerta = false;
+            alerta.showAndWait();
+            
+            // Detiene el sonido solamente si ha sido iniciado por este hilo.
+            if(tieneSonido)
+                sonido.stop();
+        }
+    }
+    
+    
+    
+    
+    protected void onNombreChanged(){
+        textoNombre.setText(nombre);
+    }
+    
+    // Ordena al receptor que se detenga.
+    public void detener(){
+        ejecutarse = false;
+    }
+    
+    
+    
+// Setters, getters y similares
     public int getLatidos(){
         return latidos;
     }
@@ -79,65 +176,4 @@ public abstract class Receptor implements Runnable {
     public boolean isEjecutando(){
         return ejecutarse;
     }
-    
-    // Código a ejecutar cuando cambia el número de latidos/minuto
-    protected void onLatidosChanged(){
-        // PLACEHOLDER
-        Platform.runLater(new Runnable(){
-            @Override
-            public void run() {
-                // Actualizar color:
-                // menos de 30, más de 150 y -1 --> rojo
-                // 31-49 y 121-150 --> amarillo
-                // 50-120 --> verde
-                if(latidos<45 || latidos>150 || latidos==-1){
-                    panel.setStyle("-fx-background-color:red;");
-                    alertar();
-                }else if(latidos<50 || latidos>120)
-                    panel.setStyle("-fx-background-color:yellow;");
-                else{
-                    panel.setStyle("-fx-background-color:green;");
-                    if(!mostrarAlerta)
-                        mostrarAlerta = true; // Vuelve a permitir mostrar una alerta después de entrar en un periodo de valores anormales
-                }                             // (eso evita que aparezca la alerta cada vez que se ejecuta onLatidosChanged).
-                
-                //Actualizar número de latidos y barra
-                if(latidos == -1){
-                    textoLatidos.setText("¡DESCONECTADO!");
-                    barra.setProgress(-1);
-                }else{
-                    textoLatidos.setText(latidos+"");
-                    barra.setProgress(latidos/255.0);
-                }
-            }
-        });
-    }
-    
-    protected void onNombreChanged(){
-        textoNombre.setText(nombre);
-    }
-    
-    // Ejecuta las acciones de alerta
-    // SOLO LLAMAR DESDE EL HILO JavaFX (usar Platform.runLater).
-    protected void alertar(){
-        if(mostrarAlerta){
-            Alert alerta = new Alert(Alert.AlertType.WARNING);
-            alerta.setTitle("¡EMERGENCIA!");
-            if(latidos == -1) // TODO: esto deberia mostrar el nombre de mostrar si es una conexion tcp. O lo sobreescribo o me cargo ese tipo de nombre. me da que lo sobreescribire.
-                alerta.setHeaderText("¡El dispositivo " + nombre + " se ha desconectado o no responde!");
-            else if(latidos<45)
-                alerta.setHeaderText("¡Las pulsaciones de " + nombre + " son demasiado bajas!");
-            else
-                alerta.setHeaderText("¡Las pulsaciones de " + nombre + " son demasiado altas!");
-
-            sonido.setFramePosition(0);
-            sonido.loop(Clip.LOOP_CONTINUOUSLY);
-            mostrarAlerta = false;
-            alerta.showAndWait();
-            sonido.stop();
-        }
-    }
-    
-    // Ordena al receptor que se detenga.
-    public abstract void detener();
 }

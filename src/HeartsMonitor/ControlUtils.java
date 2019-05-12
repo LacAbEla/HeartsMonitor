@@ -37,6 +37,9 @@ public class ControlUtils {
         panelY = 0;
     }
     
+    
+    
+    
     // Añade una conexión TCP o UDP en función de la variable booleana. (true -> TCP, false -> UDP)
     private boolean anadirConexion(int puerto, String nombre, boolean TCP){
         Receptor receptor;
@@ -98,6 +101,9 @@ public class ControlUtils {
     public boolean anadirConexionUDP(int puerto, String nombre){
         return anadirConexion(puerto, nombre, false);
     }
+    
+    
+    
 
     // Cierra todos los hilos receptores.
     public void detenerReceptores(){
@@ -120,9 +126,13 @@ public class ControlUtils {
         return receptores.toArray(new Receptor[0]);
     }
     
+    
+    
+    
     // Muestra un mensaje de error al usuario
     public static void alertarError(String titulo, String mensaje){
         Platform.runLater(new Runnable(){
+            @Override
             public void run(){
                 Alert alerta = new Alert(Alert.AlertType.ERROR);
                 alerta.setTitle(titulo);

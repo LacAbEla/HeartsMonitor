@@ -3,6 +3,7 @@
  * JavaFX tiene un hilo para la vista controlado por él y es extremadamente protectivo con este.
  * No solo no puedes controlar su código (solo el principio) sino que además no puedes tocar ningún objeto de la vista con otro hilo porque provoca errores y posibles fallos visuales.
  * Es por ello que hace falta usar Platform.runLater(Runnable). Este método le pasa un ejecutable al hilo de la vista, el cual lo ejecutará en el próximo espacio disponible (entre actualización y actualización de lo visual).
+ * Estos ejecutables se ejecutarán por separado, siendo sus propios hilos. Aun así, creo que su código solo se ejecutará por el hilo JavaFX.
 
 
 Utilizar tipos de datos pequeños (byte, short) no sirve para ahorrar espacio si la variable está sola:
@@ -11,6 +12,7 @@ Utilizar tipos de datos pequeños (byte, short) no sirve para ahorrar espacio si
 https://stackoverflow.com/questions/27122610/why-does-the-java-api-use-int-instead-of-short-or-byte#27123302
 
 TODO: usar loggers en lugar de prints
+TODO: no permitir nombres vacíos
  */
 package HeartsMonitor;
 
@@ -22,12 +24,14 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- *
+ * Clase principal de JavaFX. Inicializa la aplicación.
+ * 
  * @author Alejandro Balaguer Calderón
  */
 public class Monitor extends Application{
     
-    ControladorFXML controlador;
+    private ControladorFXML controlador;
+    private Config config; // Al dejar aquí una referencia a config me aseguro de que el recolector de basura no la borra.
     
     @Override
     //Líneas ejecutadas por el hilo de la vista al iniciar la aplicación JavaFX.
@@ -37,6 +41,10 @@ public class Monitor extends Application{
         Parent root = loader.load();
         controlador = loader.getController();
         Scene scene = new Scene(root);
+        
+        config = new Config();
+        config.setLatidosBajo(45);
+        config.setLatidosAlto(150);
         
         stage.setScene(scene);
         stage.show();
@@ -48,7 +56,7 @@ public class Monitor extends Application{
         controlador.detener();
     }
     
-    //No se utiliza en JavaFX, pero no ponerlo dará error en ciertos entornos, como al ejecutar en el IDE.
+    //No se utiliza en JavaFX, pero no ponerlo dará error en ciertos entornos, como al ejecutar en algunos IDE.
     public static void main(String[] args) {
         launch(args);
     }

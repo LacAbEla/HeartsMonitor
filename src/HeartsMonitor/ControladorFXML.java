@@ -39,10 +39,13 @@ public class ControladorFXML implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         utils = new ControlUtils(panelConexiones);
+
         
         //Pruebas
         //utils.anadirConexionUDP(12345, "testUDP");
         //utils.anadirConexionTCP(12345, "testTCP");
+        
+        
     }
     
     public void anadirConexionTCP(){
