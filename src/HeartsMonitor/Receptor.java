@@ -41,7 +41,7 @@ public abstract class Receptor implements Runnable {
         latidos = -1;
         this.puerto = puerto;
         this.nombre = nombre;
-        timeoutConexion = 3000;
+        timeoutConexion = 5000;
         mostrarAlerta = false; // Se mantendrá false hasta que se establezca la conexión por primera vez.
         
         // TODO: incluir un sonido con el programa
@@ -155,6 +155,19 @@ public abstract class Receptor implements Runnable {
     // Ordena al receptor que se detenga.
     public void detener(){
         ejecutarse = false;
+    }
+    
+    // Mostrar por la consola información sobre el funcionamiento interno de la conexión
+    protected void log(String texto){
+        ControlUtils.logBasico("LOG en " + this.toString() + ": " + texto);
+    }
+    protected void log(String texto, Exception e){
+        ControlUtils.logBasico("LOG en " + this.toString() + ": " + texto, e);
+    }
+    
+    @Override
+    public String toString(){
+        return "'" + nombre + "' (" + puerto + ")";
     }
     
     

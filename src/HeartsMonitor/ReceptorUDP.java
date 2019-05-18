@@ -26,22 +26,22 @@ public class ReceptorUDP extends Receptor {
     // TODO quitar la exception y mover el intento de conexion al bucle de ejecucion
     public ReceptorUDP(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra)throws SocketException {
         super(puerto, nombre, panel, textoNombre, textoLatidos, barra);
-        System.out.println("Hilo UDP iniciado para " + nombre + " en puerto " + puerto + ".");
     }
     
     
     @Override
     // Código del hilo
     public void run(){
+        log("Hilo UDP iniciado.");
         ejecutarse = true;
         
-        // Bucle de ejecución. Establece una conexión, espera una respuesta y actualiza los latidos.
+        // Bucle de ejecución. Establece una conexión, espera una respuesta y actualiza los latidos. Se detendrá cuando se ordene el cierre del hilo.
         while(ejecutarse){
             onLatidosChanged();
             try{
                 conexion = new DatagramSocket(puerto);
                 conexion.setSoTimeout(timeoutConexion);
-                System.out.println("Escucha UDP iniciada en " + puerto + " para " + nombre + ".");
+                log("Escucha UDP iniciada.");
                 DatagramPacket paquete = new DatagramPacket(new byte[1], 1); //Nota: el buffer (new byte[1]) y paquete.getData() son lo mismo.)
                 
                 // Espera una respuesta y actualiza los latidos.
@@ -50,11 +50,10 @@ public class ReceptorUDP extends Receptor {
                         conexion.receive(paquete);
                         latidos = paquete.getData()[0]+128; // Al enviarse un byte por UDP en java se transmite con signo. Hace falta operar para eliminarlo.
                     }catch(SocketTimeoutException e){
-                        System.out.println("\n" + nombre + " está tardando demasiado en responder.");
+                        log("El dispositivo externo está tardando demasiado en responder.");
                         latidos = -1;
                     }catch(IOException e){
-                        System.out.println("\n\nError E/S al leer un paquete UDP de " + nombre + ".\n");
-                        e.printStackTrace();
+                        log("Error de E/S al leer un paquete UDP.", e);
                         latidos = -1;
                     }
                     onLatidosChanged();
@@ -62,17 +61,14 @@ public class ReceptorUDP extends Receptor {
                 conexion.close();
             }catch(BindException e){
                 //Puerto ocupado. El programa espera 5 segundos entre intentos de conexión.
-                System.out.println("\n\nEl puerto (" + puerto + ") para " + nombre +  " está ocupado.\n");
-                e.printStackTrace();
+                log("El puerto " + puerto + " está ocupado.", e);
                 try {Thread.sleep(5000);} catch (InterruptedException ex) {}
             }catch(SocketException e){
-                System.out.println("\n\nERROR al establecer escucha UDP en el puerto " + puerto +  " para " + nombre + ".\n");
-                e.printStackTrace();
+                log("ERROR al establecer escucha UDP en el puerto " + puerto +  ".", e);
             }
             latidos = -1;
         }
         
-        // Código cuando se ha ordenado el cierre del hilo
-        System.out.println("Hilo UDP de " + nombre + " cerrado.");
+        log("Hilo UDP cerrado.");
     }
 }

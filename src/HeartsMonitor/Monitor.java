@@ -13,6 +13,7 @@ https://stackoverflow.com/questions/27122610/why-does-the-java-api-use-int-inste
 
 TODO: usar loggers en lugar de prints
 TODO: no permitir nombres vacíos
+TODO: algo falla y el programa no se cierra del todo. Se quedan hilos abiertos.
  */
 package HeartsMonitor;
 

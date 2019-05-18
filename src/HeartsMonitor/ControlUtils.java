@@ -42,6 +42,7 @@ public class ControlUtils {
     
     // Añade una conexión TCP o UDP en función de la variable booleana. (true -> TCP, false -> UDP)
     private boolean anadirConexion(int puerto, String nombre, boolean TCP){
+        boolean exitoso = false;
         Receptor receptor;
         Pane panel;
         Text textoNombre = null;
@@ -83,13 +84,11 @@ public class ControlUtils {
             receptores.add(receptor);
             Thread hilo = new Thread(receptor);
             hilo.start();
-            System.out.println("Hilo iniciado.");
-            return true;
+            exitoso = true;
         } catch (IOException e) {
-            System.out.println("\n\nError al leer FXMLPanel.fxml.\n");
-            e.printStackTrace();
+            log("Error de E/S al leer FXMLPanel.fxml.", e);
         }
-        return false;
+        return exitoso;
     }
     
     // Añade una conexión TCP.
@@ -107,18 +106,16 @@ public class ControlUtils {
 
     // Cierra todos los hilos receptores.
     public void detenerReceptores(){
-        System.out.println("Deteniendo conexiones...");
+        log("Deteniendo conexiones...");
         
         // Detiene todos los hilos receptores
         for(Receptor hilo : receptores)
             hilo.detener();
             
-        // Espera de 3 segundos para dar tiempo a los hilos de cerrarse.
-        // TODO tener en cuenta que algunos hilos podrían estar en la espera de 5 segundos por puerto ocupado.
-        // Habría que interrumpirlos, esperar más tiempo o hacer que esperen menos entre intenros.
-        try {Thread.sleep(3000);} catch (InterruptedException e) {}
+        // Espera de 5,5 segundos para dar tiempo de cerrarse a los hilos.
+        try {Thread.sleep(5500);} catch (InterruptedException e) {}
         
-        System.out.println("Conexiones cerradas.");
+        log("Conexiones cerradas.");
     }
     
     // Es, y solo es, posible que se haya vuelto inutil
@@ -129,6 +126,7 @@ public class ControlUtils {
     
     
     
+// Métodos estáticos
     // Muestra un mensaje de error al usuario
     public static void alertarError(String titulo, String mensaje){
         Platform.runLater(new Runnable(){
@@ -140,5 +138,25 @@ public class ControlUtils {
                 alerta.show();
             }
         });
+    }
+    
+    // Mostrar por la consola información sobre el funcionamiento interno de la aplicación
+    public static void log(String texto){
+        System.out.println("LOG: " + texto + "\n");
+    }
+    public static void log(String texto, Exception e){
+        System.out.println("LOG: " + texto);
+        e.printStackTrace();
+        System.out.println();
+    }
+    
+    // Versión básica de log(), pensada para ser la base de otros comandos log()
+    public static void logBasico(String texto){
+        System.out.println(texto + "\n");
+    }
+    public static void logBasico(String texto, Exception e){
+        System.out.println(texto);
+        e.printStackTrace();
+        System.out.println();
     }
 }

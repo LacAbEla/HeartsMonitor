@@ -1,7 +1,7 @@
 /*
  * Hilo encargado de mantener la comunicacin TCP con un dispositivo de entrada
  * Si cae la conexión tratará de volver a conectarse.
- * Esta clase distingue entre nombre (nombre interno, a modo de ID) y nombre a mostrar (que sobreescribira al interno en la vista si esta configurado)
+ * Esta clase distingue entre nombre (nombre interno, a modo de ID) y nombre a mostrar (que sobreescribira al interno en la vista si esta configurado).
  */
 package HeartsMonitor;
 
@@ -30,98 +30,114 @@ public class ReceptorTCP extends Receptor {
 
     public ReceptorTCP(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra) {
         super(puerto, nombre, panel, textoNombre, textoLatidos, barra);
-        System.out.println("Hilo TCP iniciado para " + nombre + " en puerto " + puerto + ".");
     }
     
     
     @Override
     //Código del hilo
     public void run(){
+        log("Hilo TCP iniciado.");
         ejecutarse = true;
         InputStream entrada;
         
+        
         //Bucle para adquirir el puerto
-        while(servidor == null){
+        while(ejecutarse && servidor == null){
             try{
                 servidor = new ServerSocket(puerto);
+                servidor.setSoTimeout(timeoutConexion); // No estar más de X tiempo esperando peticiones de conexión.
             }catch(BindException e){
                 //Puerto ocupado. El programa espera 5 segundos entre intentos de conexión.
-                System.out.println("ERROR: El puerto (" + puerto + ") para " + nombre +  " está ocupado.");
+                log("ERROR: El puerto " + puerto + " está ocupado.");
                 try {Thread.sleep(5000);} catch (InterruptedException ex) {}
             }catch(IOException e){
-                System.out.println("\n\nERROR al intentar aceptar conexiones en el puerto " + puerto + ".\n");
-                e.printStackTrace();
+                log("ERROR al intentar aceptar conexiones en el puerto " + puerto + ".", e);
             }
         } //TODO: si el puerto esta ocupado podria borrarse el dispositivo y listo
         // o casi mejor mostrarlo porque eso chocaría con lo de guardar dispositivos
+        // mejor pensado: no vale la pena mostrarlo porque no lo entenderían si no tienen a alguien que sepa del tema.
+        // mejor lo dejo en -1 y que llamen al soporte, que de todas formas es un fallo que no debería ser común
         
-        //Bucle de ejecución.
+        
+        //Bucle de ejecución. Establece una conexión, espera una respuesta y actualiza los latidos. Se detendrá cuando se ordene el cierre del hilo.
         while(ejecutarse){
             onLatidosChanged();
             try{
                 conexion = establecerConexion();
-                // Check para asegurarse de que aun hay que seguir
-                if(ejecutarse && conexion != null){
+                
+                if(conexion != null){ // Check para asegurarse de que aún hay que seguir
                     entrada = conexion.getInputStream();
-                    System.out.println("Conexión TCP aceptada para " + nombre + ".");
 
-                    // Espera una respuesta y actualiza los latidos mientras la conexión esté activa.
-                    do{
+                    // Espera una respuesta y actualiza los latidos mientras se deba seguir ejecutando y la conexión no llegue a fallar 6 veces seguidas.
+                    for(int errores = 0; ejecutarse && errores < 6; errores++){// Si hay más de 5 errores seguidos la conexión se considerará inestable y se reconectará.
                         try{
                             latidos = entrada.read();
+                            errores = 0;
                         }catch(SocketTimeoutException e){
-                            System.out.println("\n" + nombre + " está tardando demasiado en responder.");
+                            log("El dispositivo externo está tardando demasiado en responder.");
                             latidos = -1;
                         }catch(IOException e){
-                            System.out.println("\n\nError E/S al leer un paquete TCP de " + nombre + ".\n");
-                            e.printStackTrace();
+                            log("Error E/S al leer un paquete TCP.", e);
                             latidos = -1;
                         }
                         onLatidosChanged();
-                    }while(latidos != -1 && ejecutarse); //TODO por que usé un do-while en lugar de while?
-                    System.out.println("Conexión con " + nombre + " finalizada.");
+                    }
+                    
+                    // Cerrar la conexión
+                    try{
+                        conexion.close();
+                    }catch(Exception e){
+                        log("ERROR al cerrar la conexión TCP.", e);
+                    }
+                    log("Conexión finalizada.");
                 }
             }catch(IOException e){
-                System.out.println("\n\nERROR al establecer conexión con " + nombre + ".\n");
-                e.printStackTrace();
+                log("ERROR al establecer conexión.", e);
             }
             latidos = -1;
         }//TODO: testear que todo en este método (run()) funciona correctamente
         
-        //Código cuando se ha ordenado el cierre del hilo
-        System.out.println("Hilo TCP de " + nombre + " cerrado.");
+        log("Hilo TCP cerrado.");
     }
     
     //Establece la conexion con un dispositivo
-    //TODO/NOTA: cuando se establece una conexion TCP el dispositivo envia una ID textual y luego los datos de latidos cada 500ms (no obligatorio).
-    //Esta ID se utilizara para saber si el dispositivo es el adecuado o no.
-    //Si ID esperada == null entonces se acepta cualquiera.
+    //NOTA: cuando se establece una conexion TCP el dispositivo envia una ID textual y luego los datos de latidos cada 500ms (no obligatorio).
+    //Esta ID se utilizará para saber si el dispositivo es el adecuado o no. Si la ID esperada == null se adoptará la remota.
     private Socket establecerConexion() throws IOException{
-        while(true){
-            //Se ignora SocketException en este ámbito porque es causada por "socket closed" al cerrar el hilo
-            //posible TODO: controlar que la SocketException sea causada por "socket closed" y hacerlo en el run(). Nota: e.getCause() no sirve para esto.
-            //podria controlarlo con getMessage() --> si el mensaje empiexa por...
+        Socket nuevaConexion = null;
+        
+        // Intenta conseguir una conexión hasta que lo consigue o se ordena el cierre del hilo
+        while(ejecutarse){
             try{
-                conexion = servidor.accept();
+                // Intentar establecer conexión.
+                nuevaConexion = servidor.accept();
+                nuevaConexion.setSoTimeout(timeoutConexion);// No estar más de X tiempo esperando respuesta.
+                log("Conexión TCP establecida.");
+                
+                // Aceptar o rechazar en función del nombre
+                if(nombre == null){
+                    //No hay nombre. Se adopta el de la conexión y se acepta.
+                    nombre = leerNombre(nuevaConexion.getInputStream());
+                    onNombreChanged();
+                    log("Conexión TCP aceptada.");
+                    return nuevaConexion;
+                }else if(leerNombre(nuevaConexion.getInputStream()).equals(nombre)){
+                    //Hay nombre. Se acepta la conexión al coincidir el nombre.
+                    log("Conexión TCP aceptada.");
+                    return nuevaConexion;
+                }else{
+                    //Hay nombre. Este no coincide y la conexión se rechaza.
+                    nuevaConexion.close();
+                    log("Conexión TCP rechazada.");
+                }
+            }catch(SocketTimeoutException e){
+                // No hacer nada, pues es normal. TODO? podria meterlo en el log como informacion
             }catch(SocketException e){
-                return null;
-            }
-            System.out.println("LOG: Conexión TCP establecida");
-            conexion.setSoTimeout(timeoutConexion);
-            if(nombre == null){
-                //No hay nombre. Se adopta el de la conexión y se acepta.
-                nombre = leerNombre(conexion.getInputStream());
-                onNombreChanged();
-                return conexion;
-            }else if(leerNombre(conexion.getInputStream()).equals(nombre)){
-                //Hay nombre. Se acepta la conexión al coincidir el nombre.
-                return conexion;
-            }else{
-            //Hay nombre. Este no coincide y la conexión se rechaza.
-            conexion.close();
-            System.out.println("LOG: Conexión TCP rechazada.");
+                log("ERROR al establecer una conexión TCP.", e);
             }
         }
+        log("Establecimiento de conexión TCP cancelado.");
+        return null;
     }
     
     //Lee el nombre (ID) enviado por el dispositivo.
