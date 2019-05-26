@@ -32,30 +32,32 @@ import javafx.stage.Stage;
 public class Monitor extends Application{
     
     private ControladorFXML controlador;
-    private Config config; // Al dejar aquí una referencia a config me aseguro de que el recolector de basura no la borra.
+    private Global global; // Al dejar aquí una referencia a global me aseguro de que el recolector de basura no borra sus datos.
     
-    @Override
     //Líneas ejecutadas por el hilo de la vista al iniciar la aplicación JavaFX.
     //A partir del final de start() el hilo de la vista pasa a controlar la vista y no puede usarse para la aplicación.
+    @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("FXML.fxml"));
         Parent root = loader.load();
         controlador = loader.getController();
         Scene scene = new Scene(root);
         
-        config = new Config();
-        config.setLatidosBajo(45);
-        config.setLatidosAlto(150);
+        global = new Global();
+        global.setLatidosBajo(45);
+        global.setLatidosAlto(150);
         
         stage.setScene(scene);
         stage.show();
     }
+    
     
     //Líneas ejecutadas por el hilo de la vista cuando la aplicación se queda sin ventanas
     @Override
     public void stop(){
         controlador.detener();
     }
+    
     
     //No se utiliza en JavaFX, pero no ponerlo dará error en ciertos entornos, como al ejecutar en algunos IDE.
     public static void main(String[] args) {

@@ -40,53 +40,69 @@ public class ControlUtils {
     
     
     
-    // Añade una conexión TCP o UDP en función de la variable booleana. (true -> TCP, false -> UDP)
-    private boolean anadirConexion(int puerto, String nombre, boolean TCP){
+    // Añade una conexión TCP o UDP en función de la variable booleana. También cra y muestra el panel de datos.
+    private boolean anadirConexion(int puerto, String nombre, boolean esTCP){
         boolean exitoso = false;
+        boolean puertoRepetido = false;
+        boolean nombreRepetido = false;
         Receptor receptor;
         Pane panel;
         Text textoNombre = null;
         Text textoLatidos = null;
         ProgressBar barra = null;
         
-        if(nombre.equals(""))
-            nombre = null;
+        for(Receptor conexion : receptores){
+            if(conexion.getPuerto() == puerto){
+                puertoRepetido = true;
+                break;
+            }else if(conexion.getNombre().equals(nombre)){
+                nombreRepetido = true;
+                break;
+            } // Nota para JA: breaks con función obvia que mejoran la eficiencia.
+        }
         
-        // PLACEHOLDER, es una versión poco pulida de lo que (seguramente) será en el futuro
-        try {
-            // Crear y añadir panel
-            panel = FXMLLoader.load(getClass().getResource("FXMLPanel.fxml"));
-            panel.setId(nombre);
-            for(Node nodo : panel.getChildren()){
-                //Nota: el primer nodo de tipo texto es el nombre del dispositivo.
-                //el segundo es el numero de latidos
-                if(nodo instanceof Text){
-                    if(textoNombre == null)
+        if(!puertoRepetido && !nombreRepetido){
+            try {
+                // Crear y añadir panel
+                panel = FXMLLoader.load(getClass().getResource("FXMLPanel.fxml"));
+                panel.setId(nombre);
+                for(Node nodo : panel.getChildren()){
+                    if(nodo.getId().equals("txtNombre"))
                         textoNombre = (Text)nodo;
-                    else
+                    else if(nodo.getId().equals("txtLatidos"))
                         textoLatidos = (Text)nodo;
+                    else if(nodo.getId().equals("barLatidos"))
+                        barra = (ProgressBar)nodo;
                 }
-                else if(nodo instanceof ProgressBar)
-                    barra = (ProgressBar)nodo;
+                panelConexiones.add(panel, panelX, panelY);
+                panelX++;
+                if(panelX == 4){ // TODO: esto es una mierda (la constante)
+                    panelX = 0;
+                    panelY++;
+                }
+
+                // Crear y añadir hilo
+                if(esTCP)
+                    receptor = new ReceptorTCP(puerto, nombre, panel, textoNombre, textoLatidos, barra);
+                else
+                    receptor = new ReceptorUDP(puerto, nombre, panel, textoNombre, textoLatidos, barra);
+                receptores.add(receptor);
+                Thread hilo = new Thread(receptor);
+                hilo.start();
+                exitoso = true;
+            } catch (IOException e) {
+                log("Error de E/S al leer FXMLPanel.fxml.", e);
             }
-            panelConexiones.add(panel, panelX, panelY);
-            panelX++;
-            if(panelX == 2){
-                panelX = 0;
-                panelY++;
-            }
-            
-            // Crear y añadir hilo
-            if(TCP)
-                receptor = new ReceptorTCP(puerto, nombre, panel, textoNombre, textoLatidos, barra);
+        }
+        else{
+            String mensaje = "Dos conexiones no pueden tener el mismo ";
+            if(puertoRepetido)
+                mensaje += "puerto";
             else
-                receptor = new ReceptorUDP(puerto, nombre, panel, textoNombre, textoLatidos, barra);
-            receptores.add(receptor);
-            Thread hilo = new Thread(receptor);
-            hilo.start();
-            exitoso = true;
-        } catch (IOException e) {
-            log("Error de E/S al leer FXMLPanel.fxml.", e);
+                mensaje += "nombre";
+            mensaje += ". Introduce otro.";
+            
+            ControlUtils.alertarError("Error en la entrada", mensaje);
         }
         return exitoso;
     }
@@ -99,6 +115,27 @@ public class ControlUtils {
     // Añade una conexión UDP.
     public boolean anadirConexionUDP(int puerto, String nombre){
         return anadirConexion(puerto, nombre, false);
+    }
+    
+    
+    
+    
+    // Detiene y elimina una conexión.
+    public void borrarConexion(String nombre){
+        Receptor receptorABorrar = null;
+        
+        for(Receptor conexion : receptores){
+            if(conexion.getNombre().equals(nombre)){
+                conexion.detener();
+                panelConexiones.getChildren().remove(conexion.getPanel());
+                receptorABorrar = conexion;
+                break; // Nota para JA: break que mejora la eficiencia. También evitará que se borren 2 conexiones si de alguna forma llegan a haber 2 con el mismo nombre.
+                       // Además su función es bastante obvia a simple vista, por lo que no es código espagueti. Este break no es malvado, ámalo.
+                //TODO: guardar datos?
+            }
+        }
+        if(receptorABorrar != null)
+            receptores.remove(receptorABorrar);
     }
     
     

@@ -115,7 +115,7 @@ public class ReceptorTCP extends Receptor {
                 log("Conexión TCP establecida.");
                 
                 // Aceptar o rechazar en función del nombre
-                if(nombre == null){
+                if(nombre.isEmpty()){
                     //No hay nombre. Se adopta el de la conexión y se acepta.
                     nombre = leerNombre(nuevaConexion.getInputStream());
                     onNombreChanged();

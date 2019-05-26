@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
 
-// TODO que el botón de cerrar lo cierre todo
-// TODO que se puedan borrar conexiones
+// TODO: si se añade una TCP sin nombre para recibir uno remoto no se comprueba que el nombre no este repetido. arreglar.
+// TODO: arreglar la organización visual del gridpane de conexiones
  */
 package HeartsMonitor;
 
@@ -39,22 +39,55 @@ public class ControladorFXML implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         utils = new ControlUtils(panelConexiones);
+        Global.setUtils(utils);
 
         
         //Pruebas
         //utils.anadirConexionUDP(12345, "testUDP");
-        //utils.anadirConexionTCP(12345, "testTCP");
+        //utils.anadirConexionTCP(12346, "testTCP");
         
         
     }
     
+    // Al pulsar el botón "Añadir TCP"
     public void anadirConexionTCP(){
-        utils.anadirConexionTCP(Integer.parseInt(inputPuerto.getText()), inputNombre.getText());
+        int puerto = getPuerto();
+        if(puerto != -1)
+            utils.anadirConexionTCP(puerto, inputNombre.getText());
     }
     
+    // Al pulsar el botón "Añadir UDP"
     public void anadirConexionUDP(){
-        utils.anadirConexionUDP(Integer.parseInt(inputPuerto.getText()), inputNombre.getText());
+        if(inputNombre.getText().length() == 0)
+            ControlUtils.alertarError("Error al añadir", "Inserte un nombre para la conexión.");
+        else{
+            int puerto = getPuerto();
+            if(puerto != -1)
+                utils.anadirConexionUDP(puerto, inputNombre.getText());
+        }
     }
+    
+    // Devuelve el puerto introducido por el usuario. Devolverá -1 si el puerto no es válido.
+    public int getPuerto(){
+        int resultado = -1;
+        
+        if(inputPuerto.getText().equals(""))
+            ControlUtils.alertarError("Error al añadir", "Inserte un puerto en el que escuchar.");
+        else{
+            try{
+                int puerto = Integer.parseInt(inputPuerto.getText());
+                if(1023 < puerto && puerto < 65536)
+                    resultado = puerto;
+                else
+                    ControlUtils.alertarError("Error al añadir: puerto de uso habitual", "Inserte un puerto entre 1024 y 65535.");
+            }catch(NumberFormatException e){
+                ControlUtils.alertarError("Error al añadir", "El puerto debe ser un número.");
+            }
+        }
+        
+        return resultado;
+    }
+    
     
     //Código a ejecutar para detener el controlador. Ejecutado por la clase principal.
     public void detener(){

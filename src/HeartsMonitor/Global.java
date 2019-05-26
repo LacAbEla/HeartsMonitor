@@ -6,25 +6,36 @@
 package HeartsMonitor;
 
 /**
- * Clase para almacenar las opciones personalizables por el usuario.
+ * Clase para almacenar datos de ámbito global:
+ *  - La clase de utilidades del programa.
+ *  - Las opciones personalizables por el usuario.
  * 
- * @author aleba
+ * @author Alejandro Balaguer Calderón
  */
-public class Config {
+public class Global {
     
+    private static ControlUtils utils;
     private static int latidosBajo; // Límite inferior seguro de latidos.
     private static int latidosAlto; // Límite superior seguro de latidos.
 
-    public Config() {
+    public Global() {
     }
 
+
+    public static ControlUtils getUtils() {
+        return utils;
+    }
+
+    public static void setUtils(ControlUtils utils) {
+        Global.utils = utils;
+    }
     
     public static int getLatidosBajo() {
         return latidosBajo;
     }
 
     public void setLatidosBajo(int latidosBajo) {
-        Config.latidosBajo = latidosBajo;
+        Global.latidosBajo = latidosBajo;
     }
 
     public static int getLatidosAlto() {
@@ -32,7 +43,7 @@ public class Config {
     }
 
     public void setLatidosAlto(int latidosAlto) {
-        Config.latidosAlto = latidosAlto;
+        Global.latidosAlto = latidosAlto;
     }
     
 }

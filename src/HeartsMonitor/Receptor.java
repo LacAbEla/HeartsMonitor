@@ -75,9 +75,9 @@ public abstract class Receptor implements Runnable {
             @Override
             public void run() {
                 // Ejecutar código en función del estado de los latidos
-                if(latidos<Config.getLatidosBajo() || latidos>Config.getLatidosAlto() || latidos==-1)
+                if(latidos<Global.getLatidosBajo() || latidos>Global.getLatidosAlto() || latidos==-1)
                     onLatidosEmergencia();
-                else if(latidos<Config.getLatidosBajo()+10 || latidos>Config.getLatidosAlto()-15)
+                else if(latidos<Global.getLatidosBajo()+10 || latidos>Global.getLatidosAlto()-15)
                     onLatidosAviso();
                 else
                     onLatidosBien();
@@ -177,6 +177,10 @@ public abstract class Receptor implements Runnable {
         return latidos;
     }
     
+    public int getPuerto(){
+        return puerto;
+    }
+    
     public String getNombre(){
         return nombre;
     }
@@ -184,6 +188,10 @@ public abstract class Receptor implements Runnable {
     public void setNombre(String valor){
         nombre = valor;
         onNombreChanged();
+    }
+    
+    public Pane getPanel(){
+        return panel;
     }
     
     public boolean isEjecutando(){
