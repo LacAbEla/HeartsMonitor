@@ -5,7 +5,13 @@ Para cerrar el controlador debe usarse thread.interrupt. Esto pide al hilo que s
  */
 package HeartsMonitor;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +31,7 @@ public class ControlUtils {
     private final GridPane panelConexiones;
     private final ArrayList<Receptor> receptores;
     
-    // PLACEHOLDER
+    // PLACEHOLDER - TODO
     private int panelX;
     private int panelY;
     
@@ -39,9 +45,9 @@ public class ControlUtils {
     
     
     
-    
+// Control de conexiones
     // Añade una conexión TCP o UDP en función de la variable booleana. También cra y muestra el panel de datos.
-    private boolean anadirConexion(int puerto, String nombre, boolean esTCP){
+    public boolean anadirConexion(int puerto, String nombre, boolean esTCP){
         boolean exitoso = false;
         boolean puertoRepetido = false;
         boolean nombreRepetido = false;
@@ -104,6 +110,10 @@ public class ControlUtils {
             
             ControlUtils.alertarError("Error en la entrada", mensaje);
         }
+        
+        if(exitoso)
+            guardarDatos();
+        
         return exitoso;
     }
     
@@ -116,8 +126,6 @@ public class ControlUtils {
     public boolean anadirConexionUDP(int puerto, String nombre){
         return anadirConexion(puerto, nombre, false);
     }
-    
-    
     
     
     // Detiene y elimina una conexión.
@@ -136,9 +144,9 @@ public class ControlUtils {
         }
         if(receptorABorrar != null)
             receptores.remove(receptorABorrar);
+        
+        guardarDatos();
     }
-    
-    
     
 
     // Cierra todos los hilos receptores.
@@ -155,9 +163,50 @@ public class ControlUtils {
         log("Conexiones cerradas.");
     }
     
-    // Es, y solo es, posible que se haya vuelto inutil
-    public Receptor[] getConexiones(){
-        return receptores.toArray(new Receptor[0]);
+    
+    
+    
+// Carga y guardado de datos
+    // Carga a la aplicación los datos del fichero de configuración.
+    public boolean cargarDatos(){
+        boolean exitoso = false;
+        
+        try{
+            ObjectInputStream entrada = new ObjectInputStream(new BufferedInputStream(new FileInputStream(Global.FICHERO_DATOS)));
+            
+            Global.config = (Config)entrada.readObject();
+            
+            ReceptorSerializable receptor;
+            while((receptor = (ReceptorSerializable)entrada.readObject()) != null)
+                Global.utils.anadirConexion(receptor.getPuerto(), receptor.getNombre(), receptor.esTCP());
+            
+            entrada.close();
+            exitoso = true;
+        }catch (FileNotFoundException e){
+            ControlUtils.log("Archivo de configuración no encontrado.");
+        }catch (IOException e){
+            ControlUtils.log("Error de E/S al leer la configuración.", e);
+        }catch (ClassNotFoundException e) {
+            ControlUtils.log("Error al leer el contenido del archivo de configuración.", e);
+        }
+        
+        return exitoso;
+    }
+    
+    // Guarda los datos del programa (configuración y conexiones)
+    public void guardarDatos(){
+        try{
+            ObjectOutputStream salida = new ObjectOutputStream(new FileOutputStream(Global.FICHERO_DATOS));
+            
+            salida.writeObject(Global.config);
+            for(Receptor receptor : receptores)
+                salida.writeObject(new ReceptorSerializable(receptor.getPuerto(), receptor.getNombre(), receptor instanceof ReceptorTCP));
+            salida.writeObject(null); // Marca el final del archivo
+            
+            salida.close();
+        }catch(IOException e){
+            ControlUtils.log("Error de E/S al guardar la configuración.", e);
+        }
     }
     
     

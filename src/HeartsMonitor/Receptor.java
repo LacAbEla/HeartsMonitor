@@ -75,9 +75,9 @@ public abstract class Receptor implements Runnable {
             @Override
             public void run() {
                 // Ejecutar código en función del estado de los latidos
-                if(latidos<Global.getLatidosBajo() || latidos>Global.getLatidosAlto() || latidos==-1)
+                if(latidos<Global.config.getLatidosBajo() || latidos>Global.config.getLatidosAlto() || latidos==-1)
                     onLatidosEmergencia();
-                else if(latidos<Global.getLatidosBajo()+10 || latidos>Global.getLatidosAlto()-15)
+                else if(latidos<Global.config.getLatidosBajo()+10 || latidos>Global.config.getLatidosAlto()-15)
                     onLatidosAviso();
                 else
                     onLatidosBien();

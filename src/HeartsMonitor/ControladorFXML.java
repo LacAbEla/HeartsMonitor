@@ -8,6 +8,11 @@
  */
 package HeartsMonitor;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -31,29 +36,28 @@ public class ControladorFXML implements Initializable {
     private TextField inputPuerto;
     @FXML
     private TextField inputNombre;
-    
-    //private Scene scene = null;
-    private ControlUtils utils;
 
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        utils = new ControlUtils(panelConexiones);
-        Global.setUtils(utils);
+        Global.utils = new ControlUtils(panelConexiones);
 
+        // Cargar datos
+        if(!Global.utils.cargarDatos()){
+            ControlUtils.log("Error al cargar datos. Cargados datos por defecto.");
+            Global.config = new Config(45, 150);
+        }
         
         //Pruebas
         //utils.anadirConexionUDP(12345, "testUDP");
         //utils.anadirConexionTCP(12346, "testTCP");
-        
-        
     }
     
     // Al pulsar el botón "Añadir TCP"
     public void anadirConexionTCP(){
         int puerto = getPuerto();
         if(puerto != -1)
-            utils.anadirConexionTCP(puerto, inputNombre.getText());
+            Global.utils.anadirConexionTCP(puerto, inputNombre.getText());
     }
     
     // Al pulsar el botón "Añadir UDP"
@@ -63,7 +67,7 @@ public class ControladorFXML implements Initializable {
         else{
             int puerto = getPuerto();
             if(puerto != -1)
-                utils.anadirConexionUDP(puerto, inputNombre.getText());
+                Global.utils.anadirConexionUDP(puerto, inputNombre.getText());
         }
     }
     
@@ -91,7 +95,7 @@ public class ControladorFXML implements Initializable {
     
     //Código a ejecutar para detener el controlador. Ejecutado por la clase principal.
     public void detener(){
-        utils.detenerReceptores();
+        Global.utils.detenerReceptores();
     }
     
     

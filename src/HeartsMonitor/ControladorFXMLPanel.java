@@ -34,7 +34,7 @@ public class ControladorFXMLPanel implements Initializable {
     }
     
     public void btnBorrar_Click(){
-        Global.getUtils().borrarConexion(txtNombre.getText());
+        Global.utils.borrarConexion(txtNombre.getText());
     }
     
 }

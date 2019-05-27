@@ -14,36 +14,13 @@ package HeartsMonitor;
  */
 public class Global {
     
-    private static ControlUtils utils;
-    private static int latidosBajo; // Límite inferior seguro de latidos.
-    private static int latidosAlto; // Límite superior seguro de latidos.
+    public static ControlUtils utils;
+    public static Config config;
+    
+    public static final String FICHERO_DATOS = "config.dat";
+
 
     public Global() {
-    }
-
-
-    public static ControlUtils getUtils() {
-        return utils;
-    }
-
-    public static void setUtils(ControlUtils utils) {
-        Global.utils = utils;
-    }
-    
-    public static int getLatidosBajo() {
-        return latidosBajo;
-    }
-
-    public void setLatidosBajo(int latidosBajo) {
-        Global.latidosBajo = latidosBajo;
-    }
-
-    public static int getLatidosAlto() {
-        return latidosAlto;
-    }
-
-    public void setLatidosAlto(int latidosAlto) {
-        Global.latidosAlto = latidosAlto;
     }
     
 }

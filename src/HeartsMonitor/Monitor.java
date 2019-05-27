@@ -11,9 +11,7 @@ Utilizar tipos de datos pequeños (byte, short) no sirve para ahorrar espacio si
  - La JVM solo puede hacer operaciones con int/float y long/double.
 https://stackoverflow.com/questions/27122610/why-does-the-java-api-use-int-instead-of-short-or-byte#27123302
 
-TODO: usar loggers en lugar de prints
-TODO: no permitir nombres vacíos
-TODO: algo falla y el programa no se cierra del todo. Se quedan hilos abiertos.
+TODO?: usar loggers en lugar de prints
  */
 package HeartsMonitor;
 
@@ -42,11 +40,8 @@ public class Monitor extends Application{
         Parent root = loader.load();
         controlador = loader.getController();
         Scene scene = new Scene(root);
-        
         global = new Global();
-        global.setLatidosBajo(45);
-        global.setLatidosAlto(150);
-        
+               
         stage.setScene(scene);
         stage.show();
     }
