@@ -1,7 +1,6 @@
 /*
  * Clase abstracta para mantener las propiedades b'asicas de los receptores.
 
-TODO: añadir el control temporal (aviso cuando pasen más de 3 segundos sin nuevos datos, etc...)
  */
 package HeartsMonitor;
 
@@ -21,6 +20,8 @@ import javax.sound.sampled.Line;
  * @author aleba
  */
 public abstract class Receptor implements Runnable {
+    
+    private static final String CSS_PANEL = "-fx-border-style: solid; -fx-border-color: beige;";
     
     protected boolean ejecutarse; // Esta variable solo se modificará para ponerla en falso. Por tanto, no es necesario sincronizar su uso entre los hilos.
     protected int latidos; // Latidos por minuto del paciente. -1 indica que no hay datos fiables.
@@ -56,7 +57,6 @@ public abstract class Receptor implements Runnable {
             }
         }
         
-        // posible PLACEHOLDER
         this.panel = panel;
         this.textoNombre = textoNombre;
         this.textoLatidos = textoLatidos;
@@ -70,7 +70,6 @@ public abstract class Receptor implements Runnable {
     
 // Código a ejecutar cuando cambia el número de latidos/minuto
     protected void onLatidosChanged(){
-        // PLACEHOLDER
         Platform.runLater(new Runnable(){
             @Override
             public void run() {
@@ -95,16 +94,16 @@ public abstract class Receptor implements Runnable {
     }
     
     protected void onLatidosEmergencia(){
-        panel.setStyle("-fx-background-color:red;");
+        panel.setStyle(CSS_PANEL + "-fx-background-color: red;");
         alertar();
     }
     
     protected void onLatidosAviso(){
-        panel.setStyle("-fx-background-color:yellow;");
+        panel.setStyle(CSS_PANEL + "-fx-background-color: yellow;");
     }
     
     protected void onLatidosBien(){
-        panel.setStyle("-fx-background-color:green;");
+        panel.setStyle(CSS_PANEL + "-fx-background-color: green;");
         mostrarAlerta = true; // Vuelve a permitir mostrar una alerta después de entrar en un periodo de valores anormales
                               // (eso evita que aparezca la alerta cada vez que se ejecuta onLatidosChanged).
     }

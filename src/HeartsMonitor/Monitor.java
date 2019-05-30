@@ -11,7 +11,8 @@ Utilizar tipos de datos pequeños (byte, short) no sirve para ahorrar espacio si
  - La JVM solo puede hacer operaciones con int/float y long/double.
 https://stackoverflow.com/questions/27122610/why-does-the-java-api-use-int-instead-of-short-or-byte#27123302
 
-TODO?: usar loggers en lugar de prints
+TODO: permitir cambiar un poco el tamaño de la ventana principal
+TODO: bug de baja importancia. Si la conexion aún no tiene nombre y se intenta borrar podría borrarse una sin nombre distinta por el conflicto de ID (ambos nombres son "").
  */
 package HeartsMonitor;
 
@@ -43,6 +44,8 @@ public class Monitor extends Application{
         global = new Global();
                
         stage.setScene(scene);
+        stage.setTitle("HeartsMonitor - Ventana principal");
+        stage.setResizable(false);
         stage.show();
     }
     

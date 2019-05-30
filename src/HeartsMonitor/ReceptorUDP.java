@@ -23,7 +23,6 @@ public class ReceptorUDP extends Receptor {
     
     private DatagramSocket conexion;
 
-    // TODO quitar la exception y mover el intento de conexion al bucle de ejecucion
     public ReceptorUDP(int puerto, String nombre, Pane panel, Text textoNombre, Text textoLatidos, ProgressBar barra)throws SocketException {
         super(puerto, nombre, panel, textoNombre, textoLatidos, barra);
     }

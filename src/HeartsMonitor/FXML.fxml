@@ -30,9 +30,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
-      <TextField fx:id="inputPuerto" layoutX="188.0" layoutY="361.0" prefHeight="25.0" prefWidth="52.0" promptText="Puerto" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="432.0" />
-      <TextField fx:id="inputNombre" layoutX="256.0" layoutY="361.0" prefHeight="25.0" prefWidth="206.0" promptText="Nombre" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="210.0" />
-      <Button layoutX="489.0" layoutY="361.0" mnemonicParsing="false" onAction="#anadirConexionTCP" text="Añadir TCP" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="108.0" />
-      <Button layoutX="580.0" layoutY="361.0" mnemonicParsing="false" onAction="#anadirConexionUDP" text="Añadir UDP" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+      <Button fx:id="btnOpciones" layoutX="14.0" layoutY="601.0" mnemonicParsing="false" onAction="#abrirMenuOpciones" text="Modificar opciones" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" />
+      <Button fx:id="btnConexiones" layoutX="962.0" layoutY="601.0" mnemonicParsing="false" onAction="#abrirMenuConexiones" text="Añadir conexión" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
    </children>
 </AnchorPane>

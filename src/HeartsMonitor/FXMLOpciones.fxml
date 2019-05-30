@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="118.0" prefWidth="290.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HeartsMonitor.ControladorFXMLOpciones">
+   <children>
+      <TextField fx:id="inputAlto" alignment="CENTER" layoutX="241.0" layoutY="40.0" prefHeight="25.0" prefWidth="35.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="40.0" />
+      <TextField fx:id="inputBajo" alignment="CENTER" layoutX="241.0" layoutY="9.0" prefHeight="25.0" prefWidth="35.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="9.0" />
+      <Text layoutX="14.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Avisar cuando las PPM bajen de" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="12.0">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Text>
+      <Text layoutX="15.0" layoutY="64.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Avisar cuando las PPM suban de" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="43.0">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Text>
+      <Button fx:id="btnGuardar" layoutX="237.0" layoutY="144.0" mnemonicParsing="false" onAction="#onBtnGuardar_Click" text="Guardar" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+      <Button fx:id="btnCancelar" layoutX="17.0" layoutY="104.0" mnemonicParsing="false" onAction="#onBtnCancelar_Click" text="Cancelar" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="17.0" />
+   </children>
+</AnchorPane>

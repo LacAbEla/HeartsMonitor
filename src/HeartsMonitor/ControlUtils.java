@@ -61,10 +61,10 @@ public class ControlUtils {
             if(conexion.getPuerto() == puerto){
                 puertoRepetido = true;
                 break;
-            }else if(conexion.getNombre().equals(nombre)){
+            }else if(conexion.getNombre().equals(nombre) && !nombre.isEmpty()){
                 nombreRepetido = true;
                 break;
-            } // Nota para JA: breaks con función obvia que mejoran la eficiencia.
+            } // Nota para JA: breaks con función muy evidente que mejoran la eficiencia.
         }
         
         if(!puertoRepetido && !nombreRepetido){
@@ -82,7 +82,7 @@ public class ControlUtils {
                 }
                 panelConexiones.add(panel, panelX, panelY);
                 panelX++;
-                if(panelX == 4){ // TODO: esto es una mierda (la constante)
+                if(panelX == 4){
                     panelX = 0;
                     panelY++;
                 }
@@ -139,7 +139,6 @@ public class ControlUtils {
                 receptorABorrar = conexion;
                 break; // Nota para JA: break que mejora la eficiencia. También evitará que se borren 2 conexiones si de alguna forma llegan a haber 2 con el mismo nombre.
                        // Además su función es bastante obvia a simple vista, por lo que no es código espagueti. Este break no es malvado, ámalo.
-                //TODO: guardar datos?
             }
         }
         if(receptorABorrar != null)

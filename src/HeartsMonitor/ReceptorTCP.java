@@ -53,10 +53,7 @@ public class ReceptorTCP extends Receptor {
             }catch(IOException e){
                 log("ERROR al intentar aceptar conexiones en el puerto " + puerto + ".", e);
             }
-        } //TODO: si el puerto esta ocupado podria borrarse el dispositivo y listo
-        // o casi mejor mostrarlo porque eso chocaría con lo de guardar dispositivos
-        // mejor pensado: no vale la pena mostrarlo porque no lo entenderían si no tienen a alguien que sepa del tema.
-        // mejor lo dejo en -1 y que llamen al soporte, que de todas formas es un fallo que no debería ser común
+        }
         
         
         //Bucle de ejecución. Establece una conexión, espera una respuesta y actualiza los latidos. Se detendrá cuando se ordene el cierre del hilo.

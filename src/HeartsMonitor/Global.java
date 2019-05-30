@@ -6,7 +6,7 @@
 package HeartsMonitor;
 
 /**
- * Clase para almacenar datos de ámbito global:
+ * Clase para almacenar datos de ámbito global para un fácil acceso desde cualquier parte de la aplicación:
  *  - La clase de utilidades del programa.
  *  - Las opciones personalizables por el usuario.
  * 
