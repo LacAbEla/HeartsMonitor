@@ -44,7 +44,7 @@ public class Monitor extends Application{
         global = new Global();
                
         stage.setScene(scene);
-        stage.setTitle("HeartsMonitor - Ventana principal");
+        stage.setTitle("HeartsMonitor - Vista de conexiones [v2.0-alpha]");
         stage.setResizable(false);
         stage.show();
     }

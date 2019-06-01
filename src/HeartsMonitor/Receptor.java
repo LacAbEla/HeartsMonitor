@@ -87,7 +87,10 @@ public abstract class Receptor implements Runnable {
                     barra.setProgress(-1);
                 }else{
                     textoLatidos.setText(latidos+"");
-                    barra.setProgress(latidos/255.0);
+                    if(latidos < 71)
+                        barra.setProgress(latidos/130.0);
+                    else
+                        barra.setProgress(0.54 + ((latidos-70)/2.0)/256);
                 }
             }
         });
