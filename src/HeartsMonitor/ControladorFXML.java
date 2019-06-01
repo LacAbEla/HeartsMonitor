@@ -72,11 +72,4 @@ public class ControladorFXML implements Initializable {
     public void abrirMenuOpciones(){
         abrirMenu("FXMLOpciones.fxml", "Opciones");
     }
-    
-    
-    //Código a ejecutar para detener el controlador. Ejecutado por la clase principal.
-    public void detener(){
-        Global.utils.detenerReceptores();
-    }
-    
 }

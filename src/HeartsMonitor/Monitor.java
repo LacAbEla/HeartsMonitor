@@ -53,7 +53,8 @@ public class Monitor extends Application{
     //Líneas ejecutadas por el hilo de la vista cuando la aplicación se queda sin ventanas
     @Override
     public void stop(){
-        controlador.detener();
+        global.utils.guardarDatos();
+        global.utils.detenerReceptores();
     }
     
     

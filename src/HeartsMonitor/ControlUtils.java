@@ -181,6 +181,7 @@ public class ControlUtils {
             
             entrada.close();
             exitoso = true;
+            log("datos cargados con éxito.");
         }catch (FileNotFoundException e){
             ControlUtils.log("Archivo de configuración no encontrado.");
         }catch (IOException e){
@@ -203,6 +204,7 @@ public class ControlUtils {
             salida.writeObject(null); // Marca el final del archivo
             
             salida.close();
+            log("datos guardados con éxito.");
         }catch(IOException e){
             ControlUtils.log("Error de E/S al guardar la configuración.", e);
         }

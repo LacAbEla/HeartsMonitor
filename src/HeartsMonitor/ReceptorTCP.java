@@ -69,7 +69,10 @@ public class ReceptorTCP extends Receptor {
                     for(int errores = 0; ejecutarse && errores < 6; errores++){// Si hay más de 5 errores seguidos la conexión se considerará inestable y se reconectará.
                         try{
                             latidos = entrada.read();
-                            errores = 0;
+                            if(latidos == -1) // Si la conexión da -1 en este punto es porque la conexión remota se ha cerrado.
+                                errores = 100;
+                            else
+                                errores = 0;
                         }catch(SocketTimeoutException e){
                             log("El dispositivo externo está tardando demasiado en responder.");
                             latidos = -1;
