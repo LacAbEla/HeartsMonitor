@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
-
-Para cerrar el controlador debe usarse thread.interrupt. Esto pide al hilo que se cierre, pero no lo fuerza.
- */
 package HeartsMonitor;
 
 import java.io.BufferedInputStream;
@@ -23,6 +18,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 
 /**
+ * Clase de utilidades.
+ * 
+ * // TODO: mejorar el sistema que organiza el gridpane de conexiones.
  *
  * @author Alejandro Balaguer Calderón
  */
@@ -31,7 +29,6 @@ public class ControlUtils {
     private final GridPane panelConexiones;
     private final ArrayList<Receptor> receptores;
     
-    // PLACEHOLDER - TODO
     private int panelX;
     private int panelY;
     
@@ -82,7 +79,7 @@ public class ControlUtils {
                 }
                 panelConexiones.add(panel, panelX, panelY);
                 panelX++;
-                if(panelX == 4){
+                if(panelX == 4){ // TODO. 
                     panelX = 0;
                     panelY++;
                 }
@@ -110,9 +107,6 @@ public class ControlUtils {
             
             ControlUtils.alertarError("Error en la entrada", mensaje);
         }
-        
-        if(exitoso)
-            guardarDatos();
         
         return exitoso;
     }
@@ -156,8 +150,8 @@ public class ControlUtils {
         for(Receptor hilo : receptores)
             hilo.detener();
             
-        // Espera de 5,5 segundos para dar tiempo de cerrarse a los hilos.
-        try {Thread.sleep(5500);} catch (InterruptedException e) {}
+        // Dar tiempo de cerrarse a los hilos.
+        try {Thread.sleep(Receptor.TIMEOUT + 500);} catch (InterruptedException e) {}
         
         log("Conexiones cerradas.");
     }

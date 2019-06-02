@@ -1,7 +1,3 @@
-/*
- * Clase abstracta para mantener las propiedades b'asicas de los receptores.
-
- */
 package HeartsMonitor;
 
 import java.io.File;
@@ -21,13 +17,13 @@ import javax.sound.sampled.Line;
  */
 public abstract class Receptor implements Runnable {
     
-    private static final String CSS_PANEL = "-fx-border-style: solid; -fx-border-color: beige;";
+    private static final String CSS_PANEL = "-fx-border-style: solid; -fx-border-color: #F4F4F4;";
+    public static final int TIMEOUT = 6000; // Tiempo de respuesta máximo (en milisegundos) para la recepción de datos.
     
     protected boolean ejecutarse; // Esta variable solo se modificará para ponerla en falso. Por tanto, no es necesario sincronizar su uso entre los hilos.
     protected int latidos; // Latidos por minuto del paciente. -1 indica que no hay datos fiables.
     protected int puerto;
     protected String nombre;
-    protected int timeoutConexion; // Tiempo de respuesta máximo (en milisegundos) para la recepción de datos.
     protected boolean mostrarAlerta; // Se utiliza para evitar mostrar un aviso de desconexión/latidos anormales mientras se espera a establecer la conexión por primera vez.
     
     private static volatile Clip sonido; // Volatile es como synchronized pero para variables, aunque no funcionan exactamente igual.
@@ -42,15 +38,13 @@ public abstract class Receptor implements Runnable {
         latidos = -1;
         this.puerto = puerto;
         this.nombre = nombre;
-        timeoutConexion = 5000;
         mostrarAlerta = false; // Se mantendrá false hasta que se establezca la conexión por primera vez.
         
-        // TODO: incluir un sonido con el programa
         // Si el Clip para el sonido no ha sido iniciado, hacerlo.
         if(sonido == null){
             try{
                 sonido = (Clip)AudioSystem.getLine(new Line.Info(Clip.class));
-                sonido.open(AudioSystem.getAudioInputStream(new File("C:\\Windows\\media\\chord.wav")));
+                sonido.open(AudioSystem.getAudioInputStream(new File(Global.FICHERO_AUDIO)));
             }catch(Exception e){
                 sonido = null;
                 ControlUtils.alertarError("Error de sonido", "Ha habido un error al intentar añadir la función de alerta sonora.\nInformación para el desarrollador:\n" + e.toString());
@@ -119,7 +113,7 @@ public abstract class Receptor implements Runnable {
     protected void alertar(){
         boolean tieneSonido = false; // Indica si este diálogo utiliza el sonido. El sonido solo se utilizará por un diálogo a la vez.
         
-        if(mostrarAlerta){
+        if(ejecutarse && mostrarAlerta){
             Alert alerta = new Alert(Alert.AlertType.WARNING);
             alerta.setTitle("¡EMERGENCIA!");
             if(latidos == -1)

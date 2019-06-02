@@ -39,15 +39,16 @@ public class ReceptorUDP extends Receptor {
             onLatidosChanged();
             try{
                 conexion = new DatagramSocket(puerto);
-                conexion.setSoTimeout(timeoutConexion);
+                conexion.setSoTimeout(TIMEOUT);
                 log("Escucha UDP iniciada.");
                 DatagramPacket paquete = new DatagramPacket(new byte[1], 1); //Nota: el buffer (new byte[1]) y paquete.getData() son lo mismo.)
                 
                 // Espera una respuesta y actualiza los latidos.
-                while(ejecutarse){
+                for(int errores = 0; ejecutarse && errores < 6; errores++){// Si hay más de 5 errores seguidos la conexión se considerará inestable y se reconectará.
                     try{
                         conexion.receive(paquete);
                         latidos = paquete.getData()[0]+128; // Al enviarse un byte por UDP en java se transmite con signo. Hace falta operar para eliminarlo.
+                        errores = 0;
                     }catch(SocketTimeoutException e){
                         log("El dispositivo externo está tardando demasiado en responder.");
                         latidos = -1;

@@ -9,13 +9,16 @@
 
 <Pane fx:id="panelBase" prefHeight="91.0" prefWidth="252.0" style="-fx-border-style: solid; -fx-border-color: beige; -fx-background-color: red;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HeartsMonitor.ControladorFXMLPanel">
    <children>
-      <Text fx:id="txtNombre" layoutX="8.0" layoutY="23.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre" wrappingWidth="210.0">
+      <Text fx:id="txtNombre" layoutX="8.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre" wrappingWidth="210.0">
          <font>
-            <Font size="17.0" />
+            <Font size="18.0" />
          </font>
       </Text>
       <Button fx:id="btnBorrar" layoutX="221.0" layoutY="7.0" mnemonicParsing="false" onAction="#btnBorrar_Click" prefHeight="25.0" prefWidth="0.0" text="B" />
       <ProgressBar fx:id="barLatidos" layoutX="27.0" layoutY="66.0" prefWidth="200.0" progress="0.02" />
-      <Text fx:id="txtLatidos" layoutX="27.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-1" textAlignment="CENTER" wrappingWidth="200.0" />
+      <Text fx:id="txtLatidos" layoutX="27.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="-1" textAlignment="CENTER" wrappingWidth="200.0">
+         <font>
+            <Font size="18.0" />
+         </font></Text>
    </children>
 </Pane>

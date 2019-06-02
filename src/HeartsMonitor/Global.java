@@ -9,6 +9,7 @@ package HeartsMonitor;
  * Clase para almacenar datos de ámbito global para un fácil acceso desde cualquier parte de la aplicación:
  *  - La clase de utilidades del programa.
  *  - Las opciones personalizables por el usuario.
+ *  - Nobres de archivos.
  * 
  * @author Alejandro Balaguer Calderón
  */
@@ -18,6 +19,7 @@ public class Global {
     public static Config config;
     
     public static final String FICHERO_DATOS = "config.dat";
+    public static final String FICHERO_AUDIO = "alerta.wav";
 
 
     public Global() {

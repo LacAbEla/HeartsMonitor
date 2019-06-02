@@ -45,7 +45,7 @@ public class ReceptorTCP extends Receptor {
         while(ejecutarse && servidor == null){
             try{
                 servidor = new ServerSocket(puerto);
-                servidor.setSoTimeout(timeoutConexion); // No estar más de X tiempo esperando peticiones de conexión.
+                servidor.setSoTimeout(TIMEOUT); // No estar más de X tiempo esperando peticiones de conexión.
             }catch(BindException e){
                 //Puerto ocupado. El programa espera 5 segundos entre intentos de conexión.
                 log("ERROR: El puerto " + puerto + " está ocupado.");
@@ -111,7 +111,7 @@ public class ReceptorTCP extends Receptor {
             try{
                 // Intentar establecer conexión.
                 nuevaConexion = servidor.accept();
-                nuevaConexion.setSoTimeout(timeoutConexion);// No estar más de X tiempo esperando respuesta.
+                nuevaConexion.setSoTimeout(TIMEOUT);// No estar más de X tiempo esperando respuesta.
                 log("Conexión TCP establecida.");
                 
                 // Aceptar o rechazar en función del nombre

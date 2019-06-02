@@ -51,6 +51,9 @@ public class ControladorFXMLConexiones implements Initializable {
             exitoso = Global.utils.anadirConexionTCP(puerto, inputNombre.getText());
         }
         
+        if(exitoso)
+            Global.utils.guardarDatos();
+        
         return exitoso;
     }
     
@@ -66,6 +69,9 @@ public class ControladorFXMLConexiones implements Initializable {
                 exitoso = Global.utils.anadirConexionUDP(puerto, inputNombre.getText());
             }
         }
+        
+        if(exitoso)
+            Global.utils.guardarDatos();
         
         return exitoso;
     }

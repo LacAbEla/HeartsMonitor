@@ -4,7 +4,6 @@
  * and open the template in the editor.
 
 // TODO: si se añade una TCP sin nombre para recibir uno remoto no se comprueba que el nombre no este repetido.
-// TODO: arreglar la organización visual del gridpane de conexiones
  */
 package HeartsMonitor;
 
